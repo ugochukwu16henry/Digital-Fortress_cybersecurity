@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     compliance_mode_default: bool = True
     require_tenant_header: bool = True
 
+    # BunkerWeb API integration
+    bunkerweb_api_url: str = "http://bunkerweb:8080/api/v1"
+    bunkerweb_api_key: str = "change-me"
+    bunkerweb_api_timeout: int = 10
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
