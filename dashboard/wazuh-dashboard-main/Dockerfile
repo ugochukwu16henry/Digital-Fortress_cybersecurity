@@ -18,6 +18,7 @@ RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor
 
 RUN groupadd -r opensearch-dashboards && useradd -r -g opensearch-dashboards opensearch-dashboards && mkdir /home/opensearch-dashboards && chown opensearch-dashboards:opensearch-dashboards /home/opensearch-dashboards
 
+WORKDIR /app/dashboard/wazuh-dashboard-main
 ENV OPENSEARCH_DASHBOARDS_PORT=8080
 EXPOSE 8080
 USER opensearch-dashboards
