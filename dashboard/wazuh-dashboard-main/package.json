@@ -211,7 +211,7 @@
     "@elastic/good": "^9.0.1-kibana3",
     "@elastic/numeral": "npm:@amoo-miki/numeral@2.6.0",
     "@elastic/request-crypto": "2.0.2",
-    "@elastic/safer-lodash-set": "0.0.0",
+    "@elastic/safer-lodash-set": "0.0.1",
     "@hapi/accept": "^5.0.2",
     "@hapi/boom": "^9.1.4",
     "@hapi/cookie": "^11.0.2",
