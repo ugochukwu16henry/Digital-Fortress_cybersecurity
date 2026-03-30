@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.models import Honeytoken, Incident, ThreatActor
-from app.db.session import get_db, set_tenant_context
+from app.db.session import ensure_tenant_organization, get_db, set_tenant_context
 from app.schemas.honeytoken import (
     HoneytokenCallbackRequest,
     HoneytokenCallbackResponse,
@@ -27,6 +27,7 @@ def generate_honeytoken(
 ) -> HoneytokenGenerateResponse:
     tenant_id = request.state.tenant_id
     set_tenant_context(db, tenant_id)
+    ensure_tenant_organization(db, tenant_id)
 
     token_value = f"dfh_{secrets.token_urlsafe(24)}"
     now = datetime.now(timezone.utc)
@@ -59,6 +60,7 @@ def honeytoken_callback(
 ) -> HoneytokenCallbackResponse:
     tenant_id = request.state.tenant_id
     set_tenant_context(db, tenant_id)
+    ensure_tenant_organization(db, tenant_id)
 
     honeytoken = db.scalar(
         select(Honeytoken).where(

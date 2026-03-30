@@ -4,6 +4,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
+from app.db.models import Organization
 
 
 engine = create_engine(settings.database_url, pool_pre_ping=True)
@@ -24,3 +25,12 @@ def set_tenant_context(db: Session, tenant_id: str) -> None:
         text("SELECT set_config('app.current_tenant_id', :tenant_id, true)"),
         {"tenant_id": tenant_id},
     )
+
+
+def ensure_tenant_organization(db: Session, tenant_id: str) -> None:
+    existing = db.get(Organization, tenant_id)
+    if existing is not None:
+        return
+
+    db.add(Organization(id=tenant_id, name=f"Tenant {tenant_id[:8]}"))
+    db.flush()

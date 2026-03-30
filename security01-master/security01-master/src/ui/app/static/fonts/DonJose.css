@@ -1,0 +1,8 @@
+@font-face {
+  font-family: "Don Jose";
+  font-style: normal;
+  font-weight: normal;
+  src:
+    url(../fonts/DonJose/DonJose_Black.woff) format("woff"),
+    url(../fonts/DonJose/DonJose_Black.otf) format("opentype");
+}

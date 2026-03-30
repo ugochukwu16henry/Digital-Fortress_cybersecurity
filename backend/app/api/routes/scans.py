@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.db.models import Finding, ScanRun
-from app.db.session import get_db, set_tenant_context
+from app.db.session import ensure_tenant_organization, get_db, set_tenant_context
 from app.schemas.scan import ScanRunRequest, ScanRunResponse
 from app.services.event_bus import publish_scan_completed_event
 from app.services.orchestrator import orchestrate_scan
@@ -16,6 +16,7 @@ router = APIRouter(prefix="/scans", tags=["scans"])
 def run_scan(payload: ScanRunRequest, request: Request, db: Session = Depends(get_db)) -> ScanRunResponse:
     tenant_id = request.state.tenant_id
     set_tenant_context(db, tenant_id)
+    ensure_tenant_organization(db, tenant_id)
 
     started_at = datetime.now(timezone.utc)
 

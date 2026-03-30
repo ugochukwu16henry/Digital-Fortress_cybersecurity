@@ -1,0 +1,146 @@
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-Thin.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: italic;
+  font-weight: 100;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-ThinItalic.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-ExtraLight.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: italic;
+  font-weight: 200;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-ExtraLightItalic.ttf)
+    format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-Light.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: italic;
+  font-weight: 300;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-LightItalic.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-Regular.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-Italic.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-Medium.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-MediumItalic.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-SemiBold.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-SemiBoldItalic.ttf)
+    format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-Bold.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-BoldItalic.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-ExtraBold.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: italic;
+  font-weight: 800;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-ExtraBoldItalic.ttf)
+    format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-Black.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Public Sans";
+  font-style: italic;
+  font-weight: 900;
+  font-display: swap;
+  src: url(../fonts/Public_sans/PublicSans-BlackItalic.ttf) format("truetype");
+}

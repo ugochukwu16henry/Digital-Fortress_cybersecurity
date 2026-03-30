@@ -1,0 +1,1991 @@
+{% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/login.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
+{% block page %}
+    <!-- Content -->
+    <div class="bg-light-subtle">
+        <div class="login-background">
+            <input type="hidden" id="ui_user" value="{{ 'yes' if ui_user else 'no' }}" />
+            <input type="hidden"
+                   id="ui_reverse_proxy"
+                   value="{{ 'yes' if ui_reverse_proxy else 'no' }}" />
+            <input type="hidden"
+                   id="csrf_token"
+                   name="csrf_token"
+                   value="{{ csrf_token() }}" />
+            <input type="hidden" name="theme" value="light" />
+            <div class="container-xxl">
+                <div class="position-fixed top-0 end-0 m-5 me-7" style="z-index: 1050;">
+                    <!-- prettier-ignore -->
+                    <div class="d-flex justify-content-end align-items-center mb-5">
+                        <!-- Language Selector -->
+                        <div class="me-3">{% include "language-selector.html" %}</div>
+                        <!-- Theme Toggle -->
+                        <div class="toggle-container d-flex align-items-center bg-white p-2 rounded-pill shadow-lg me-3">
+                            <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
+                                   for="dark-mode-toggle"
+                                   data-i18n="theme.light">Light</label>
+                            <div class="form-switch">
+                                <input id="dark-mode-toggle"
+                                       name="dark-mode-toggle"
+                                       class="form-check-input"
+                                       type="checkbox"
+                                       role="switch"
+                                       {% if theme == "dark" %}checked{% endif %} />
+                            </div>
+                            <label class="setting-checkbox-label mb-0 fw-bold text-secondary"
+                                   for="dark-mode-toggle"
+                                   data-i18n="theme.dark">Dark</label>
+                        </div>
+                        <ul class="d-flex mb-0 list-unstyled">
+                            <li class="me-3">
+                                <a role="button"
+                                   class="btn btn-sm btn-outline-dark d-flex align-items-center h-100"
+                                   aria-pressed="true"
+                                   href="https://panel.bunkerweb.io/store/support?utm_campaign=self&utm_source=ui"
+                                   target="_blank"
+                                   rel="noopener">
+                                    <span class="bx bx-help-circle me-0 me-md-2"></span>
+                                    <span class="d-none d-md-inline" data-i18n="button.need_help">Need help?</span>
+                                </a>
+                            </li>
+                            <li class="position-relative">
+                                <button id="news-button"
+                                        type="button"
+                                        class="btn btn-sm btn-dark text-uppercase d-flex align-items-center"
+                                        aria-pressed="true"
+                                        data-bs-toggle="offcanvas"
+                                        data-bs-target="#side-offcanvas-news"
+                                        aria-controls="side-offcanvas-news">
+                                    <span class="bx bx-news me-0 me-md-2"></span>
+                                    <span class="d-none d-md-inline" data-i18n="button.news">News</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="authentication-wrapper authentication-basic container-p-y">
+                    <div class="authentication-inner w-100">
+                        <!-- Setup -->
+                        <div class="card px-sm-6 px-0">
+                            <div class="card-header d-flex justify-content-between align-items-center mw-100">
+                                <div class="pt-1">
+                                    <h4 class="card-title d-inline border fw-bold p-2 don-jose"
+                                        data-i18n="setup.title">Setup Wizard</h4>
+                                    <p class="card-subtitle text-muted text-truncate mt-3"
+                                       data-i18n="setup.subtitle">Follow the steps to complete the setup wizard</p>
+                                </div>
+                                <div class="app-brand justify-content-center">
+                                    <span class="app-brand-logo login">
+                                        <i class="bx bx-lg bxs-magic-wand bx-tada"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body p-2 pb-8">
+                                <div class="d-flex justify-content-center">
+                                    <nav class="p-3 template-steps-container align-items-center mw-100 rounded-top"
+                                         aria-label="breadcrumb">
+                                        <ol class="breadcrumb nav nav-scroller mb-0 flex-nowrap overflow-hidden active"
+                                            role="tablist">
+                                            <li class="breadcrumb-item nav-link d-flex align-items-center pe-0">
+                                                <button class="btn btn-primary pt-3 pb-3 me-3 active"
+                                                        role="tab"
+                                                        data-bs-toggle="tab"
+                                                        data-bs-target="#navs-steps-1"
+                                                        aria-controls="navs-steps-1"
+                                                        aria-selected="true">1</button>
+                                                <div class="text-nowrap">
+                                                    <div class="fw-bold text-primary" data-i18n="setup.step1.title">Admin User</div>
+                                                    <small class="text-muted" data-i18n="setup.step1.subtitle">Create Admin User</small>
+                                                </div>
+                                            </li>
+                                            <li class="breadcrumb-item nav-link d-flex align-items-center pe-0">
+                                                <button class="btn btn-primary pt-3 pb-3 me-3 disabled"
+                                                        role="tab"
+                                                        data-bs-toggle="tab"
+                                                        data-bs-target="#navs-steps-2"
+                                                        aria-controls="navs-steps-2">2</button>
+                                                <div class="text-nowrap">
+                                                    <div class="fw-bold text-muted" data-i18n="setup.step2.title">UI specific Settings</div>
+                                                    <small class="text-muted" data-i18n="setup.step2.subtitle">Configure web UI specific settings</small>
+                                                </div>
+                                            </li>
+                                            <li class="breadcrumb-item nav-link d-flex align-items-center pe-0">
+                                                <button class="btn btn-primary pt-3 pb-3 me-3 disabled"
+                                                        role="tab"
+                                                        data-bs-toggle="tab"
+                                                        data-bs-target="#navs-steps-3"
+                                                        aria-controls="navs-steps-3">3</button>
+                                                <div class="text-nowrap">
+                                                    <div class="fw-bold text-muted" data-i18n="setup.step3.title">PRO Features</div>
+                                                    <small class="text-muted" data-i18n="setup.step3.subtitle">Activate PRO features</small>
+                                                </div>
+                                            </li>
+                                            <li class="breadcrumb-item nav-link d-flex align-items-center pe-0">
+                                                <button class="btn btn-primary pt-3 pb-3 me-3 disabled"
+                                                        role="tab"
+                                                        data-bs-toggle="tab"
+                                                        data-bs-target="#navs-steps-4"
+                                                        aria-controls="navs-steps-4">4</button>
+                                                <div class="text-nowrap">
+                                                    <div class="fw-bold text-muted" data-i18n="setup.step4.title">Overview</div>
+                                                    <small class="text-muted" data-i18n="setup.step4.subtitle">Review your settings</small>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </nav>
+                                </div>
+                                <div class="tab-content p-3 align-items-center mw-100">
+                                    <div id="navs-steps-1"
+                                         class="ps-2 pe-2 tab-pane fade show active"
+                                         role="tabpanel"
+                                         data-step="1"
+                                         aria-labelledby="navs-steps-1-tab">
+                                        <div class="pt-1 pb-4">
+                                            <h5 class="mb-1 fw-bold" data-i18n="setup.step1.title">Admin User</h5>
+                                            <p class="card-subtitle text-muted" data-i18n="setup.step1.subtitle">Create Admin User</p>
+                                        </div>
+                                        {% if not ui_user %}
+                                            <div class="row pb-0">
+                                                <div class="col-12 col-md-6 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-username"
+                                                               for="username"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.admin_username">
+                                                            Admin Username
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Username must be between 1 and 256 characters long"
+                                                                  data-i18n="tooltip.username_length">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <input id="username"
+                                                           name="username"
+                                                           type="text"
+                                                           class="form-control plugin-setting mt-1"
+                                                           aria-labelledby="label-username"
+                                                           pattern="^.{1,256}$"
+                                                           required />
+                                                </div>
+                                                <div class="col-12 col-md-6 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-username"
+                                                               for="username"
+                                                               class="form-label fw-semibold text-truncate">
+                                                            <span data-i18n="form.label.admin_email">Admin Email</span><span id="email-optional"> <i><span data-i18n="form.label.optional">(optional)</span></i></span>
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Email must be between 1 and 256 characters long"
+                                                                  data-i18n="tooltip.email_length">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <input id="email"
+                                                           name="email"
+                                                           type="email"
+                                                           placeholder="John.doe@example.com"
+                                                           class="form-control plugin-setting mt-1"
+                                                           aria-labelledby="label-email" />
+                                                </div>
+                                                <div class="col-12 col-md-6 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-password"
+                                                               for="password"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.admin_password">
+                                                            Admin Password
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Password must have at least 8 characters, 1 uppercase letter, 1 number, and 1 special character"
+                                                                  data-i18n="tooltip.password_requirements">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-password-toggle">
+                                                        <div class="input-group input-group-merge mt-1">
+                                                            <input class="form-control plugin-setting"
+                                                                   type="password"
+                                                                   id="password"
+                                                                   name="password"
+                                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                                   aria-labelledby="label-password"
+                                                                   autocomplete="off"
+                                                                   required
+                                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$" />
+                                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-3">
+                                                        <ul class="list-unstyled" id="password-requirements">
+                                                            <li id="length-check">
+                                                                <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_length">Your password must
+                                                                have at least 8 characters.</span>
+                                                            </li>
+                                                            <li id="uppercase-check">
+                                                                <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_uppercase">Your password must
+                                                                have at least 1 uppercase letter.</span>
+                                                            </li>
+                                                            <li id="number-check">
+                                                                <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_number">Your password must
+                                                                have at least 1 number.</span>
+                                                            </li>
+                                                            <li id="special-check">
+                                                                <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_special">Your password must
+                                                                have at least 1 special character.</span>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-confirm_password"
+                                                               for="confirm_password"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.confirm_password">
+                                                            Confirm Password
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Confirm password must match the password"
+                                                                  data-i18n="tooltip.confirm_password_match">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-password-toggle">
+                                                        <div class="input-group input-group-merge mt-1">
+                                                            <input class="form-control plugin-setting"
+                                                                   type="password"
+                                                                   id="confirm_password"
+                                                                   name="confirm_password"
+                                                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                                   aria-labelledby="label-confirm_password"
+                                                                   autocomplete="off"
+                                                                   required
+                                                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$" />
+                                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                                               data-i18n="setup.status.admin_user_exists">
+                                                🧑‍🚀 An admin user already exists, please proceed to the next step
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                    <div id="navs-steps-2"
+                                         class="ps-2 pe-2 tab-pane fade"
+                                         role="tabpanel"
+                                         data-step="2"
+                                         aria-labelledby="navs-steps-2-tab">
+                                        <div class="pt-1 pb-4">
+                                            <h5 class="mb-1 fw-bold" data-i18n="setup.step2.title">UI specific Settings</h5>
+                                            <p class="card-subtitle text-muted" data-i18n="setup.step2.subtitle">Configure web UI specific settings</p>
+                                        </div>
+                                        {% if not ui_reverse_proxy %}
+                                            <div class="pb-6">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <label id="label-SERVER_NAME"
+                                                           for="SERVER_NAME"
+                                                           class="form-label fw-semibold text-truncate"
+                                                           data-i18n="form.label.server_name">Server name</label>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                              data-bs-toggle="tooltip"
+                                                              data-bs-placement="top"
+                                                              data-bs-original-title="The server name of the service"
+                                                              data-i18n="tooltip.server_name">
+                                                            <span class="bx bx-question-mark bx-xs"></span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                {% set server_name_setting = plugins_settings.get('SERVER_NAME', {'default': 'www.example.com', 'regex': '^.+$'}) %}
+                                                <input id="SERVER_NAME"
+                                                       name="SERVER_NAME"
+                                                       type="text"
+                                                       placeholder="{{ server_name_setting['default'] }}"
+                                                       value="{{ server_name }}"
+                                                       class="form-control plugin-setting mt-1"
+                                                       aria-labelledby="label-SERVER_NAME"
+                                                       pattern="{{ server_name_setting['regex'] }}"
+                                                       required />
+                                            </div>
+                                            <h6 class="mt-2 mb-2 fw-bold"
+                                                data-i18n="setup.step2.section.lets_encrypt">Let's Encrypt</h6>
+                                            <div class="row pb-0">
+                                                <div class="col-12 col-md-4 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-AUTO_LETS_ENCRYPT"
+                                                               for="AUTO_LETS_ENCRYPT"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.auto_lets_encrypt">
+                                                            Auto Let's Encrypt
+                                                        </label>
+                                                        {% if auto_lets_encrypt == "yes" %}
+                                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="From global settings">
+                                                                <span class="bx bx-globe bx-xs"></span>
+                                                            </span>
+                                                        {% endif %}
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Whether to automatically request a Let's Encrypt certificate"
+                                                                  data-i18n="tooltip.auto_lets_encrypt">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-check form-switch mt-1">
+                                                        <input id="AUTO_LETS_ENCRYPT"
+                                                               name="AUTO_LETS_ENCRYPT"
+                                                               class="form-check-input"
+                                                               type="checkbox"
+                                                               role="switch"
+                                                               aria-labelledby="label-AUTO_LETS_ENCRYPT"
+                                                               {% if auto_lets_encrypt == "yes" %}checked{% endif %} />
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-4 pb-3"
+                                                     data-le-field="wildcard"
+                                                     {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Wildcard certificates are only supported with DNS challenges." data-i18n="tooltip.wildcard_dns_only"{% endif %}>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-USE_LETS_ENCRYPT_WILDCARD"
+                                                               for="USE_LETS_ENCRYPT_WILDCARD"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.wildcard_certificates">
+                                                            Wildcard Certificates
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_wildcard == "yes" %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global settings">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains."
+                                                                  data-i18n="tooltip.wildcard_certificates">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-check form-switch mt-1">
+                                                        <input id="USE_LETS_ENCRYPT_WILDCARD"
+                                                               name="USE_LETS_ENCRYPT_WILDCARD"
+                                                               class="form-check-input"
+                                                               type="checkbox"
+                                                               role="switch"
+                                                               aria-labelledby="label-USE_LETS_ENCRYPT_WILDCARD"
+                                                               {% if lets_encrypt_wildcard == "yes" %}checked{% endif %}
+                                                               {% if lets_encrypt_challenge == 'http' %}disabled{% endif %} />
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-4 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
+                                                               for="LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.lets_encrypt_disable_public_suffixes">
+                                                            Disable Public Suffixes (PSL Blacklist)
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_disable_public_suffixes == "no" %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global settings">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Disable certificate requests for domains matching the Public Suffix List (recommended)."
+                                                                  data-i18n="tooltip.lets_encrypt_disable_public_suffixes">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-check form-switch mt-1">
+                                                        <input id="LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
+                                                               name="LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
+                                                               class="form-check-input"
+                                                               type="checkbox"
+                                                               role="switch"
+                                                               aria-labelledby="label-LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
+                                                               {% if lets_encrypt_disable_public_suffixes == "yes" %}checked{% endif %} />
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-EMAIL_LETS_ENCRYPT"
+                                                               for="EMAIL_LETS_ENCRYPT"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.email_for_lets_encrypt">
+                                                            Email for Let's Encrypt
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if email_lets_encrypt %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global settings">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="The email address that will be used for Let's Encrypt"
+                                                                  data-i18n="tooltip.email_lets_encrypt">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <input id="EMAIL_LETS_ENCRYPT"
+                                                           name="EMAIL_LETS_ENCRYPT"
+                                                           type="text"
+                                                           placeholder="John.doe@example.com"
+                                                           value="{{ email_lets_encrypt }}"
+                                                           class="form-control plugin-setting mt-1"
+                                                           aria-labelledby="label-EMAIL_LETS_ENCRYPT"
+                                                           pattern="{{ plugins_settings.get('EMAIL_LETS_ENCRYPT', {'regex': '^.*$'})['regex'] }}" />
+                                                </div>
+                                                <div class="col-12 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_SERVER"
+                                                               for="LETS_ENCRYPT_SERVER"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.certificate_authority">
+                                                            Certificate Authority
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_server != "letsencrypt" %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global settings">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Choose your certificate provider to show provider-specific settings."
+                                                                  data-i18n="tooltip.lets_encrypt_server">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <select id="LETS_ENCRYPT_SERVER"
+                                                            name="LETS_ENCRYPT_SERVER"
+                                                            class="form-select d-none"
+                                                            aria-labelledby="label-LETS_ENCRYPT_SERVER">
+                                                        {% for cert_server in plugins_settings.get('LETS_ENCRYPT_SERVER', {'select': ['letsencrypt', 'zerossl']})['select'] %}
+                                                            <option value="{{ cert_server }}"
+                                                                    {% if lets_encrypt_server == cert_server %}selected{% endif %}>
+                                                                {{ cert_server }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <ul class="nav nav-pills nav-fill mt-1"
+                                                        id="acme-server-tabs"
+                                                        role="tablist"
+                                                        data-i18n="setup.step2.lets_encrypt.certificate_authority_selector"
+                                                        aria-label="Certificate Authority Selector">
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link {% if lets_encrypt_server == 'letsencrypt' %}active{% endif %}"
+                                                                    id="acme-tab-letsencrypt"
+                                                                    type="button"
+                                                                    role="tab"
+                                                                    data-acme-server="letsencrypt"
+                                                                    data-i18n="setup.step2.section.lets_encrypt"
+                                                                    aria-selected="{% if lets_encrypt_server == 'letsencrypt' %}true{% else %}false{% endif %}">
+                                                                Let's Encrypt
+                                                            </button>
+                                                        </li>
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link {% if lets_encrypt_server == 'zerossl' %}active{% endif %}"
+                                                                    id="acme-tab-zerossl"
+                                                                    type="button"
+                                                                    role="tab"
+                                                                    data-acme-server="zerossl"
+                                                                    data-i18n="setup.step2.section.zerossl"
+                                                                    aria-selected="{% if lets_encrypt_server == 'zerossl' %}true{% else %}false{% endif %}">
+                                                                ZeroSSL
+                                                            </button>
+                                                        </li>
+                                                    </ul>
+                                                    <div class="tab-content border rounded-3 p-3 mt-2 bg-body-secondary">
+                                                        <div class="tab-pane fade {% if lets_encrypt_server == 'letsencrypt' %}show active{% endif %}"
+                                                             id="acme-pane-letsencrypt"
+                                                             role="tabpanel">
+                                                            <p class="text-muted mb-3 small"
+                                                               data-i18n="setup.step2.lets_encrypt.letsencrypt_description">
+                                                                Use Let's Encrypt for standard ACME issuance. Staging is available for testing and integration checks.
+                                                            </p>
+                                                            <div class="row">
+                                                                <div class="col-12 col-md-6 pb-3" data-le-field="staging">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <label id="label-USE_LETS_ENCRYPT_STAGING"
+                                                                               for="USE_LETS_ENCRYPT_STAGING"
+                                                                               class="form-label fw-semibold text-truncate"
+                                                                               data-i18n="form.label.use_lets_encrypt_staging">
+                                                                            Use Let's Encrypt Staging
+                                                                        </label>
+                                                                        <div class="d-flex align-items-center">
+                                                                            {% if lets_encrypt_staging == "yes" %}
+                                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                      data-bs-toggle="tooltip"
+                                                                                      data-bs-placement="top"
+                                                                                      data-bs-original-title="From global settings">
+                                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                                </span>
+                                                                            {% endif %}
+                                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Whether to use the Let's Encrypt staging environment"
+                                                                                  data-i18n="tooltip.use_lets_encrypt_staging">
+                                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-check form-switch mt-1">
+                                                                        <input id="USE_LETS_ENCRYPT_STAGING"
+                                                                               name="USE_LETS_ENCRYPT_STAGING"
+                                                                               class="form-check-input"
+                                                                               type="checkbox"
+                                                                               role="switch"
+                                                                               aria-labelledby="label-USE_LETS_ENCRYPT_STAGING"
+                                                                               {% if lets_encrypt_staging == "yes" %}checked{% endif %} />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="tab-pane fade {% if lets_encrypt_server == 'zerossl' %}show active{% endif %}"
+                                                             id="acme-pane-zerossl"
+                                                             role="tabpanel">
+                                                            <p class="text-muted mb-3 small"
+                                                               data-i18n="setup.step2.lets_encrypt.zerossl_description">
+                                                                Use ZeroSSL with zerossl-bot. Provide an account email or API key for account issuance and key-based reissue tracking.
+                                                            </p>
+                                                            <div class="row">
+                                                                <div class="col-12 pb-3">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <label id="label-LETS_ENCRYPT_ZEROSSL_API_KEY"
+                                                                               for="LETS_ENCRYPT_ZEROSSL_API_KEY"
+                                                                               class="form-label fw-semibold text-truncate"
+                                                                               data-i18n="form.label.zerossl_api_key">
+                                                                            ZeroSSL API Key
+                                                                        </label>
+                                                                        <div class="d-flex align-items-center">
+                                                                            {% if lets_encrypt_zerossl_api_key %}
+                                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                      data-bs-toggle="tooltip"
+                                                                                      data-bs-placement="top"
+                                                                                      data-bs-original-title="From global settings">
+                                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                                </span>
+                                                                            {% endif %}
+                                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Optional ZeroSSL API key used by zerossl-bot."
+                                                                                  data-i18n="tooltip.zerossl_api_key">
+                                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <input id="LETS_ENCRYPT_ZEROSSL_API_KEY"
+                                                                           name="LETS_ENCRYPT_ZEROSSL_API_KEY"
+                                                                           type="password"
+                                                                           placeholder=""
+                                                                           value="{{ lets_encrypt_zerossl_api_key }}"
+                                                                           class="form-control plugin-setting mt-1"
+                                                                           aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_KEY"
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_KEY', {'regex': '^.*$'})['regex'] }}" />
+                                                                    <small class="text-muted d-block mt-1"
+                                                                           data-i18n="setup.step2.lets_encrypt.zerossl_api_key_hint">If empty, ZeroSSL will use the configured email for account registration.</small>
+                                                                </div>
+                                                                <div class="col-sm-6 col-md-3 pb-3">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <label id="label-LETS_ENCRYPT_ZEROSSL_API_RETRY"
+                                                                               for="LETS_ENCRYPT_ZEROSSL_API_RETRY"
+                                                                               class="form-label fw-semibold text-truncate"
+                                                                               data-i18n="form.label.zerossl_api_retry">
+                                                                            ZeroSSL API Retries
+                                                                        </label>
+                                                                        <div class="d-flex align-items-center">
+                                                                            {% if lets_encrypt_zerossl_api_retry != "3" %}
+                                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                      data-bs-toggle="tooltip"
+                                                                                      data-bs-placement="top"
+                                                                                      data-bs-original-title="From global settings">
+                                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                                </span>
+                                                                            {% endif %}
+                                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Number of retries for ZeroSSL API requests (0 disables retries)."
+                                                                                  data-i18n="tooltip.zerossl_api_retry">
+                                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <input id="LETS_ENCRYPT_ZEROSSL_API_RETRY"
+                                                                           name="LETS_ENCRYPT_ZEROSSL_API_RETRY"
+                                                                           type="number"
+                                                                           min="0"
+                                                                           value="{{ lets_encrypt_zerossl_api_retry }}"
+                                                                           class="form-control plugin-setting mt-1"
+                                                                           aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_RETRY"
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY', {'regex': '^\\d+$'})['regex'] }}" />
+                                                                </div>
+                                                                <div class="col-sm-6 col-md-3 pb-3">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <label id="label-LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
+                                                                               for="LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
+                                                                               class="form-label fw-semibold text-truncate"
+                                                                               data-i18n="form.label.zerossl_api_retry_delay">
+                                                                            ZeroSSL API Retry Delay
+                                                                        </label>
+                                                                        <div class="d-flex align-items-center">
+                                                                            {% if lets_encrypt_zerossl_api_retry_delay != "2" %}
+                                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                      data-bs-toggle="tooltip"
+                                                                                      data-bs-placement="top"
+                                                                                      data-bs-original-title="From global settings">
+                                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                                </span>
+                                                                            {% endif %}
+                                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Delay in seconds between ZeroSSL API retries."
+                                                                                  data-i18n="tooltip.zerossl_api_retry_delay">
+                                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <input id="LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
+                                                                           name="LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
+                                                                           type="number"
+                                                                           min="0"
+                                                                           value="{{ lets_encrypt_zerossl_api_retry_delay }}"
+                                                                           class="form-control plugin-setting mt-1"
+                                                                           aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY', {'regex': '^\\d+$'})['regex'] }}" />
+                                                                </div>
+                                                                <div class="col-sm-6 col-md-3 pb-3">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <label id="label-LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
+                                                                               for="LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
+                                                                               class="form-label fw-semibold text-truncate"
+                                                                               data-i18n="form.label.zerossl_api_connect_timeout">
+                                                                            ZeroSSL API Connect Timeout
+                                                                        </label>
+                                                                        <div class="d-flex align-items-center">
+                                                                            {% if lets_encrypt_zerossl_api_connect_timeout != "5" %}
+                                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                      data-bs-toggle="tooltip"
+                                                                                      data-bs-placement="top"
+                                                                                      data-bs-original-title="From global settings">
+                                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                                </span>
+                                                                            {% endif %}
+                                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Connection timeout in seconds for ZeroSSL API calls."
+                                                                                  data-i18n="tooltip.zerossl_api_connect_timeout">
+                                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <input id="LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
+                                                                           name="LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
+                                                                           type="number"
+                                                                           min="1"
+                                                                           value="{{ lets_encrypt_zerossl_api_connect_timeout }}"
+                                                                           class="form-control plugin-setting mt-1"
+                                                                           aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT', {'regex': '^[1-9]\\d*$'})['regex'] }}" />
+                                                                </div>
+                                                                <div class="col-sm-6 col-md-3 pb-3">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <label id="label-LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
+                                                                               for="LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
+                                                                               class="form-label fw-semibold text-truncate"
+                                                                               data-i18n="form.label.zerossl_api_max_time">
+                                                                            ZeroSSL API Max Time
+                                                                        </label>
+                                                                        <div class="d-flex align-items-center">
+                                                                            {% if lets_encrypt_zerossl_api_max_time != "20" %}
+                                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                      data-bs-toggle="tooltip"
+                                                                                      data-bs-placement="top"
+                                                                                      data-bs-original-title="From global settings">
+                                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                                </span>
+                                                                            {% endif %}
+                                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Maximum total time in seconds for each ZeroSSL API request."
+                                                                                  data-i18n="tooltip.zerossl_api_max_time">
+                                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <input id="LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
+                                                                           name="LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
+                                                                           type="number"
+                                                                           min="1"
+                                                                           value="{{ lets_encrypt_zerossl_api_max_time }}"
+                                                                           class="form-control plugin-setting mt-1"
+                                                                           aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_MAX_TIME', {'regex': '^[1-9]\\d*$'})['regex'] }}" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6 col-md-4 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_CHALLENGE"
+                                                               for="LETS_ENCRYPT_CHALLENGE"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.challenge_type">
+                                                            Challenge Type
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_challenge == "dns" %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global settings">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="The challenge type to use for Let's Encrypt (http or dns)."
+                                                                  data-i18n="tooltip.challenge_type">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <select id="LETS_ENCRYPT_CHALLENGE"
+                                                            name="LETS_ENCRYPT_CHALLENGE"
+                                                            class="form-select mt-1"
+                                                            aria-labelledby="label-LETS_ENCRYPT_CHALLENGE">
+                                                        {% for challenge in plugins_settings.get('LETS_ENCRYPT_CHALLENGE', {'select': ['http', 'dns']})['select'] %}
+                                                            <option value="{{ challenge }}"
+                                                                    {% if lets_encrypt_challenge == challenge %}selected{% endif %}>
+                                                                {{ challenge }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-6 col-md-4 pb-3"
+                                                     data-le-field="dns-provider"
+                                                     {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="DNS provider is only supported with DNS challenges." data-i18n="tooltip.dns_provider_dns_only"{% endif %}>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_DNS_PROVIDER"
+                                                               for="LETS_ENCRYPT_DNS_PROVIDER"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.dns_provider">DNS Provider</label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_dns_provider %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global settings">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="The DNS provider to use for DNS challenges."
+                                                                  data-i18n="tooltip.dns_provider">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <select id="LETS_ENCRYPT_DNS_PROVIDER"
+                                                            name="LETS_ENCRYPT_DNS_PROVIDER"
+                                                            class="form-select mt-1"
+                                                            aria-labelledby="label-LETS_ENCRYPT_DNS_PROVIDER"
+                                                            {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}>
+                                                        {% for provider in plugins_settings.get('LETS_ENCRYPT_DNS_PROVIDER', {'select': [
+                                                            "",
+                                                            "bunny",
+                                                            "cloudns",
+                                                            "cloudflare",
+                                                            "desec",
+                                                            "digitalocean",
+                                                            "domainoffensive",
+                                                            "domeneshop",
+                                                            "dnsimple",
+                                                            "dnsmadeeasy",
+                                                            "duckdns",
+                                                            "dynu",
+                                                            "gandi",
+                                                            "gehirn",
+                                                            "godaddy",
+                                                            "google",
+                                                            "hetzner",
+                                                            "infomaniak",
+                                                            "ionos",
+                                                            "linode",
+                                                            "luadns",
+                                                            "njalla",
+                                                            "nsone",
+                                                            "ovh",
+                                                            "pdns",
+                                                            "rfc2136",
+                                                            "route53",
+                                                            "sakuracloud",
+                                                            "scaleway",
+                                                            "transip",
+                                                            ]})['select'] %}
+                                                            <option value="{{ provider }}"
+                                                                    {% if lets_encrypt_dns_provider == provider %}selected{% endif %}>
+                                                                {{ provider }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-6 col-md-4 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_PROFILE"
+                                                               for="LETS_ENCRYPT_PROFILE"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.lets_encrypt_profile">
+                                                            Let's Encrypt Profile
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_profile != "classic" %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global settings">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="The profile to use for Let's Encrypt (classic, tlsserver, shortlived)."
+                                                                  data-i18n="tooltip.lets_encrypt_profile">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <select id="LETS_ENCRYPT_PROFILE"
+                                                            name="LETS_ENCRYPT_PROFILE"
+                                                            class="form-select mt-1"
+                                                            aria-labelledby="label-LETS_ENCRYPT_PROFILE">
+                                                        {% for profile in plugins_settings.get('LETS_ENCRYPT_PROFILE', {'select': ["classic", "tlsserver", "shortlived"]})['select'] %}
+                                                            <option value="{{ profile }}"
+                                                                    {% if lets_encrypt_profile == profile %}selected{% endif %}>
+                                                                {{ profile }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-6 col-md-4 pb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_CUSTOM_PROFILE"
+                                                               for="LETS_ENCRYPT_CUSTOM_PROFILE"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.lets_encrypt_custom_profile">
+                                                            Let's Encrypt Custom Profile
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_custom_profile %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global settings">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="The custom profile to use for Let's Encrypt (e.g. 'my_custom_profile')."
+                                                                  data-i18n="tooltip.lets_encrypt_custom_profile">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <input id="LETS_ENCRYPT_CUSTOM_PROFILE"
+                                                           name="LETS_ENCRYPT_CUSTOM_PROFILE"
+                                                           type="text"
+                                                           placeholder=""
+                                                           value="{{ lets_encrypt_custom_profile }}"
+                                                           class="form-control plugin-setting mt-1"
+                                                           aria-labelledby="label-LETS_ENCRYPT_CUSTOM_PROFILE"
+                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_CUSTOM_PROFILE', {'regex': '^.*$'})['regex'] }}" />
+                                                </div>
+                                                <div class="col-sm-6 col-md-4 pb-3"
+                                                     data-le-field="dns-propagation"
+                                                     {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="DNS propagation is only supported with DNS challenges." data-i18n="tooltip.dns_propagation_dns_only"{% endif %}>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_DNS_PROPAGATION"
+                                                               for="LETS_ENCRYPT_DNS_PROPAGATION"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.dns_propagation">
+                                                            DNS Propagation
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if lets_encrypt_dns_propagation != "default" %}
+                                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="From global settings">
+                                                                    <span class="bx bx-globe bx-xs"></span>
+                                                                </span>
+                                                            {% endif %}
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="The time to wait for DNS propagation in seconds for DNS challenges."
+                                                                  data-i18n="tooltip.dns_propagation">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <input id="LETS_ENCRYPT_DNS_PROPAGATION"
+                                                           name="LETS_ENCRYPT_DNS_PROPAGATION"
+                                                           type="text"
+                                                           value="{{ lets_encrypt_dns_propagation }}"
+                                                           class="form-control plugin-setting mt-1"
+                                                           aria-labelledby="label-LETS_ENCRYPT_DNS_PROPAGATION"
+                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_DNS_PROPAGATION', {'regex': '^(default|\\d+)$'})['regex'] }}"
+                                                           {% if lets_encrypt_challenge == 'http' %}disabled{% endif %} />
+                                                </div>
+                                                <div class="col-12 pb-3"
+                                                     data-le-field="dns-credentials"
+                                                     {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Credentials are only supported with DNS challenges." data-i18n="tooltip.dns_credentials_dns_only"{% endif %}>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label id="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
+                                                               for="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS"
+                                                               class="form-label fw-semibold text-truncate"
+                                                               data-i18n="form.label.lets_encrypt_dns_credential_items">
+                                                            Lets encrypt dns credential items
+                                                        </label>
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-original-title="Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges."
+                                                                  data-i18n="tooltip.dns_credential_items">
+                                                                <span class="bx bx-question-mark bx-xs"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <textarea id="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS" name="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS" class="form-control plugin-setting mt-1" aria-labelledby="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS" {% if lets_encrypt_challenge == 'http' %}disabled{% endif %}>{% for item in lets_encrypt_dns_credential_items %}{{ item }}{% if not loop.last %}
+{% endif %}{% endfor %}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="text-center my-3">
+                                                <a id="advanced-settings-toggle"
+                                                   class="advanced-settings-toggle"
+                                                   data-bs-toggle="collapse"
+                                                   href="#advanced-settings-content"
+                                                   role="button"
+                                                   aria-expanded="false"
+                                                   aria-controls="advanced-settings-content">
+                                                    Advanced Settings <i class="bx bx-chevron-down"></i>
+                                                </a>
+                                            </div>
+                                            <div class="collapse" id="advanced-settings-content">
+                                                <div class="container">
+                                                    <div class="row pb-0">
+                                                        <h6 class="mt-2 mb-2 fw-bold"
+                                                            data-i18n="setup.step2.section.reverse_proxy">
+                                                            Reverse Proxy
+                                                        </h6>
+                                                        <div class="col-12 col-md-6 pb-6">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-REVERSE_PROXY_HOST"
+                                                                       for="REVERSE_PROXY_HOST"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.ui_host">UI Host</label>
+                                                                <div class="d-flex align-items-center">
+                                                                    {% if ui_host %}
+                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="From UI_HOST environment variable">
+                                                                            <span class="bx bx-globe bx-xs"></span>
+                                                                        </span>
+                                                                    {% endif %}
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="The host that will be used for the reverse proxy"
+                                                                          data-i18n="tooltip.ui_host">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <input id="REVERSE_PROXY_HOST"
+                                                                   name="REVERSE_PROXY_HOST"
+                                                                   type="text"
+                                                                   value="{{ ui_host }}"
+                                                                   class="form-control plugin-setting mt-1"
+                                                                   aria-labelledby="label-REVERSE_PROXY_HOST"
+                                                                   pattern="{{ plugins_settings.get('REVERSE_PROXY_HOST', {'regex': '^.+$'})['regex'] }}"
+                                                                   required />
+                                                        </div>
+                                                        <div class="col-12 col-md-6 pb-6">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-username"
+                                                                       for="username"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.ui_url">UI URL</label>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="badge badge-center rounded-pill bg-warning text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="We recommend using a random URL"
+                                                                          data-i18n="tooltip.ui_url_security">
+                                                                        <span class="bx bx-shield bx-xs"></span>
+                                                                    </span>
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="The URL that will be used for the reverse proxy"
+                                                                          data-i18n="tooltip.ui_url">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            {% set reverse_proxy_url_setting = plugins_settings.get('REVERSE_PROXY_URL', {'default': '/', 'regex': '^.+$'}) %}
+                                                            <input id="REVERSE_PROXY_URL"
+                                                                   name="REVERSE_PROXY_URL"
+                                                                   type="text"
+                                                                   value="{{ reverse_proxy_url_setting['default'] }}"
+                                                                   class="form-control plugin-setting mt-1"
+                                                                   aria-labelledby="label-REVERSE_PROXY_URL"
+                                                                   pattern="{{ reverse_proxy_url_setting['regex'] }}"
+                                                                   required />
+                                                        </div>
+                                                        <h6 class="mt-2 mb-2 fw-bold" data-i18n="setup.step2.section.real_ip">Real IP</h6>
+                                                        <div class="col-4 pb-3">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-USE_REAL_IP"
+                                                                       for="USE_REAL_IP"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.use_real_ip">
+                                                                    Use Real IP
+                                                                </label>
+                                                                {% if use_real_ip == "yes" %}
+                                                                    <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="From global settings">
+                                                                        <span class="bx bx-globe bx-xs"></span>
+                                                                    </span>
+                                                                {% endif %}
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="Use Real IP"
+                                                                          data-i18n="tooltip.use_real_ip">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-check form-switch mt-1">
+                                                                <input id="USE_REAL_IP"
+                                                                       name="USE_REAL_IP"
+                                                                       class="form-check-input"
+                                                                       type="checkbox"
+                                                                       role="switch"
+                                                                       aria-labelledby="label-USE_REAL_IP"
+                                                                       {% if use_real_ip == "yes" %}checked{% endif %} />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-4 pb-3">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-USE_PROXY_PROTOCOL"
+                                                                       for="USE_PROXY_PROTOCOL"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.use_proxy_protocol">
+                                                                    Use PROXY protocol
+                                                                </label>
+                                                                {% if use_proxy_protocol == "yes" %}
+                                                                    <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="From global settings">
+                                                                        <span class="bx bx-globe bx-xs"></span>
+                                                                    </span>
+                                                                {% endif %}
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="Enable PROXY protocol communication."
+                                                                          data-i18n="tooltip.use_proxy_protocol">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-check form-switch mt-1">
+                                                                <input id="USE_PROXY_PROTOCOL"
+                                                                       name="USE_PROXY_PROTOCOL"
+                                                                       class="form-check-input"
+                                                                       type="checkbox"
+                                                                       role="switch"
+                                                                       aria-labelledby="label-USE_PROXY_PROTOCOL"
+                                                                       {% if use_proxy_protocol == "yes" %}checked{% endif %} />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-4 pb-3">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-REAL_IP_RECURSIVE"
+                                                                       for="REAL_IP_RECURSIVE"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.real_ip_recursive">
+                                                                    Real IP recursive
+                                                                </label>
+                                                                {% if real_ip_recursive == "no" %}
+                                                                    <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="From global settings">
+                                                                        <span class="bx bx-globe bx-xs"></span>
+                                                                    </span>
+                                                                {% endif %}
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="Perform a recursive search in the header container IP address."
+                                                                          data-i18n="tooltip.real_ip_recursive">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-check form-switch mt-1">
+                                                                <input id="REAL_IP_RECURSIVE"
+                                                                       name="REAL_IP_RECURSIVE"
+                                                                       class="form-check-input"
+                                                                       type="checkbox"
+                                                                       role="switch"
+                                                                       aria-labelledby="label-REAL_IP_RECURSIVE"
+                                                                       {% if real_ip_recursive == "yes" %}checked{% endif %} />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 col-md-6 pb-3">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-REAL_IP_HEADER"
+                                                                       for="REAL_IP_HEADER"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.real_ip_header">
+                                                                    Real IP header
+                                                                </label>
+                                                                <div class="d-flex align-items-center">
+                                                                    {% if real_ip_header != "X-Forwarded-For" %}
+                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="From global settings">
+                                                                            <span class="bx bx-globe bx-xs"></span>
+                                                                        </span>
+                                                                    {% endif %}
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="HTTP header containing the real IP or special value proxy_protocol for PROXY protocol."
+                                                                          data-i18n="tooltip.real_ip_header">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <input id="REAL_IP_HEADER"
+                                                                   name="REAL_IP_HEADER"
+                                                                   type="text"
+                                                                   value="{{ real_ip_header }}"
+                                                                   class="form-control plugin-setting mt-1"
+                                                                   aria-labelledby="label-REAL_IP_HEADER"
+                                                                   pattern="{{ plugins_settings.get('REAL_IP_HEADER', {'regex': '^.+$'})['regex'] }}" />
+                                                        </div>
+                                                        <div class="col-12 col-md-6 pb-3">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-REAL_IP_FROM"
+                                                                       for="REAL_IP_FROM"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.real_ip_from">
+                                                                    Real IP from
+                                                                </label>
+                                                                <div class="d-flex align-items-center">
+                                                                    {% if real_ip_from != "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8" %}
+                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="From global settings">
+                                                                            <span class="bx bx-globe bx-xs"></span>
+                                                                        </span>
+                                                                    {% endif %}
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="List of trusted IPs / networks, separated with spaces, where proxied requests come from."
+                                                                          data-i18n="tooltip.real_ip_from">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <input id="REAL_IP_FROM"
+                                                                   name="REAL_IP_FROM"
+                                                                   type="text"
+                                                                   value="{{ real_ip_from }}"
+                                                                   class="form-control plugin-setting mt-1"
+                                                                   aria-labelledby="label-REAL_IP_FROM"
+                                                                   pattern="{{ plugins_settings.get('REAL_IP_FROM', {'regex': '^.+$'})['regex'] }}" />
+                                                        </div>
+                                                        <div class="col-12 pb-3">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-REAL_IP_FROM_URLS"
+                                                                       for="REAL_IP_FROM_URLS"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.real_ip_from_urls">
+                                                                    Real IP from (URLs)
+                                                                </label>
+                                                                <div class="d-flex align-items-center">
+                                                                    {% if real_ip_from_urls %}
+                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="From global settings">
+                                                                            <span class="bx bx-globe bx-xs"></span>
+                                                                        </span>
+                                                                    {% endif %}
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from. Also supports file:// URLs and and auth basic using http://user:pass@url scheme."
+                                                                          data-i18n="tooltip.real_ip_from_urls">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <input id="REAL_IP_FROM_URLS"
+                                                                   name="REAL_IP_FROM_URLS"
+                                                                   type="text"
+                                                                   value="{{ real_ip_from_urls }}"
+                                                                   class="form-control plugin-setting mt-1"
+                                                                   aria-labelledby="label-REAL_IP_FROM_URLS"
+                                                                   pattern="{{ plugins_settings.get('REAL_IP_FROM_URLS', {'regex': '^.+$'})['regex'] }}" />
+                                                        </div>
+                                                        <h6 class="mt-2 mb-2 fw-bold"
+                                                            data-i18n="setup.step2.section.custom_certificate">
+                                                            Custom certificate
+                                                        </h6>
+                                                        <div class="col-12 col-md-6 pb-3">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-USE_CUSTOM_SSL"
+                                                                       for="USE_CUSTOM_SSL"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.use_custom_ssl">
+                                                                    Use Custom SSL
+                                                                </label>
+                                                                {% if use_custom_ssl == "yes" %}
+                                                                    <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="From global settings">
+                                                                        <span class="bx bx-globe bx-xs"></span>
+                                                                    </span>
+                                                                {% endif %}
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="Whether to use a custom SSL certificate"
+                                                                          data-i18n="tooltip.use_custom_ssl">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-check form-switch mt-1">
+                                                                <input id="USE_CUSTOM_SSL"
+                                                                       name="USE_CUSTOM_SSL"
+                                                                       class="form-check-input"
+                                                                       type="checkbox"
+                                                                       role="switch"
+                                                                       aria-labelledby="label-USE_CUSTOM_SSL"
+                                                                       {% if use_custom_ssl == "yes" %}checked{% endif %} />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 col-md-6 pb-3">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-CUSTOM_SSL_CERT_PRIORITY"
+                                                                       for="CUSTOM_SSL_CERT_PRIORITY"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.certificate_priority">
+                                                                    Certificate priority
+                                                                </label>
+                                                                {% if custom_ssl_cert_priority == "data" %}
+                                                                    <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="From global settings">
+                                                                        <span class="bx bx-globe bx-xs"></span>
+                                                                    </span>
+                                                                {% endif %}
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="Choose whether to prioritize the certificate from file path or from base64 data."
+                                                                          data-i18n="tooltip.certificate_priority">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <select id="CUSTOM_SSL_CERT_PRIORITY"
+                                                                    name="CUSTOM_SSL_CERT_PRIORITY"
+                                                                    class="form-select mt-1"
+                                                                    aria-labelledby="label-CUSTOM_SSL_CERT_PRIORITY"
+                                                                    {% if use_custom_ssl == "no" %}disabled{% endif %}>
+                                                                {% for priority in plugins_settings.get('CUSTOM_SSL_CERT_PRIORITY', {'select': ['file', 'data']})['select'] %}
+                                                                    <option value="{{ priority }}"
+                                                                            {% if custom_ssl_cert_priority == priority %}selected{% endif %}>
+                                                                        {{ priority }}
+                                                                    </option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-12 col-md-6 pb-3">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-CUSTOM_SSL_CERT"
+                                                                       for="CUSTOM_SSL_CERT"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.custom_ssl_certificate">
+                                                                    Custom SSL Certificate
+                                                                </label>
+                                                                <div class="d-flex align-items-center">
+                                                                    {% if custom_ssl_cert %}
+                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="From global settings">
+                                                                            <span class="bx bx-globe bx-xs"></span>
+                                                                        </span>
+                                                                    {% endif %}
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="The custom SSL certificate path"
+                                                                          data-i18n="tooltip.custom_ssl_cert_path">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <input id="CUSTOM_SSL_CERT"
+                                                                   name="CUSTOM_SSL_CERT"
+                                                                   type="text"
+                                                                   placeholder="/tmp/cert.pem"
+                                                                   value="{{ custom_ssl_cert }}"
+                                                                   class="form-control plugin-setting mt-1"
+                                                                   aria-labelledby="label-CUSTOM_SSL_CERT"
+                                                                   pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT', {'regex': '^.*$'})['regex'] }}"
+                                                                   {% if use_custom_ssl == "no" %}disabled{% endif %} />
+                                                        </div>
+                                                        <div class="col-12 col-md-6 pb-3">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-CUSTOM_SSL_KEY"
+                                                                       for="CUSTOM_SSL_KEY"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.custom_ssl_key">
+                                                                    Custom SSL Key
+                                                                </label>
+                                                                <div class="d-flex align-items-center">
+                                                                    {% if custom_ssl_key %}
+                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="From global settings">
+                                                                            <span class="bx bx-globe bx-xs"></span>
+                                                                        </span>
+                                                                    {% endif %}
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="The custom SSL key path"
+                                                                          data-i18n="tooltip.custom_ssl_key_path">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <input id="CUSTOM_SSL_KEY"
+                                                                   name="CUSTOM_SSL_KEY"
+                                                                   type="text"
+                                                                   placeholder="/tmp/key.pem"
+                                                                   value="{{ custom_ssl_key }}"
+                                                                   class="form-control plugin-setting mt-1"
+                                                                   aria-labelledby="label-CUSTOM_SSL_KEY"
+                                                                   pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY', {'regex': '^.*$'})['regex'] }}"
+                                                                   {% if use_custom_ssl == "no" %}disabled{% endif %} />
+                                                        </div>
+                                                        <div class="col-12 col-md-6 pb-3">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-CUSTOM_SSL_CERT_DATA"
+                                                                       for="CUSTOM_SSL_CERT_DATA"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.custom_ssl_certificate_data">
+                                                                    Custom SSL Certificate data (base64/pem)
+                                                                </label>
+                                                                <div class="d-flex align-items-center">
+                                                                    {% if custom_ssl_cert_data %}
+                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="From global settings">
+                                                                            <span class="bx bx-globe bx-xs"></span>
+                                                                        </span>
+                                                                    {% endif %}
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="The custom SSL certificate data (base64/pem)"
+                                                                          data-i18n="tooltip.custom_ssl_cert_data">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mt-1 position-relative plugin-file-setting-wrapper">
+                                                                <input id="CUSTOM_SSL_CERT_DATA"
+                                                                       name="CUSTOM_SSL_CERT_DATA"
+                                                                       type="hidden"
+                                                                       class="plugin-setting plugin-setting-file-text"
+                                                                       aria-labelledby="label-CUSTOM_SSL_CERT_DATA"
+                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT_DATA', {'regex': '^.*$'})['regex'] }}"
+                                                                       value="{{ custom_ssl_cert_data }}"
+                                                                       data-upload-target="#custom-ssl-cert-data-upload"
+                                                                       data-manual-target="#custom-ssl-cert-data-manual"
+                                                                       {% if use_custom_ssl == "no" %}disabled{% endif %} />
+                                                                <div class="position-relative plugin-setting-file-upload-container">
+                                                                    <div class="input-group">
+                                                                        <input id="custom-ssl-cert-data-upload"
+                                                                               type="file"
+                                                                               class="form-control plugin-setting-file-upload"
+                                                                               data-file-input="#CUSTOM_SSL_CERT_DATA"
+                                                                               aria-labelledby="label-CUSTOM_SSL_CERT_DATA"
+                                                                               accept=".pem,.crt,.cer,.txt"
+                                                                               {% if use_custom_ssl == "no" %}disabled{% endif %} />
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-secondary plugin-setting-file-mode-toggle"
+                                                                                data-file-input="#CUSTOM_SSL_CERT_DATA"
+                                                                                data-mode="upload"
+                                                                                data-upload-label="Switch to text editor"
+                                                                                data-manual-label="Back to file upload"
+                                                                                data-bs-toggle="tooltip"
+                                                                                data-bs-placement="top"
+                                                                                data-bs-original-title="Switch to text editor"
+                                                                                aria-label="Switch to text editor"
+                                                                                {% if use_custom_ssl == "no" %}disabled{% endif %}>
+                                                                            <i class="bx bx-edit-alt"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <textarea id="custom-ssl-cert-data-manual"
+                                                                          class="form-control mt-2 d-none plugin-setting-file-manual"
+                                                                          rows="6"
+                                                                          data-file-input="#CUSTOM_SSL_CERT_DATA"
+                                                                          placeholder="Paste or edit the certificate data here..."
+                                                                          aria-labelledby="label-CUSTOM_SSL_CERT_DATA"
+                                                                          {% if use_custom_ssl == "no" %}disabled{% endif %}>{{ custom_ssl_cert_data }}</textarea>
+                                                                <small class="text-muted d-block mt-1 plugin-setting-file-status"
+                                                                       data-empty-text="No file selected">
+                                                                    {% if custom_ssl_cert_data %}
+                                                                        Current content loaded ({{ custom_ssl_cert_data|length }} chars)
+                                                                    {% else %}
+                                                                        No file selected
+                                                                    {% endif %}
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 col-md-6 pb-3">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <label id="label-CUSTOM_SSL_KEY_DATA"
+                                                                       for="CUSTOM_SSL_KEY_DATA"
+                                                                       class="form-label fw-semibold text-truncate"
+                                                                       data-i18n="form.label.custom_ssl_key_data">
+                                                                    Custom SSL Key data (base64/pem)
+                                                                </label>
+                                                                <div class="d-flex align-items-center">
+                                                                    {% if custom_ssl_key_data %}
+                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="From global settings">
+                                                                            <span class="bx bx-globe bx-xs"></span>
+                                                                        </span>
+                                                                    {% endif %}
+                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="The custom SSL key data (base64/pem)"
+                                                                          data-i18n="tooltip.custom_ssl_key_data">
+                                                                        <span class="bx bx-question-mark bx-xs"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mt-1 position-relative plugin-file-setting-wrapper">
+                                                                <input id="CUSTOM_SSL_KEY_DATA"
+                                                                       name="CUSTOM_SSL_KEY_DATA"
+                                                                       type="hidden"
+                                                                       class="plugin-setting plugin-setting-file-text"
+                                                                       aria-labelledby="label-CUSTOM_SSL_KEY_DATA"
+                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY_DATA', {'regex': '^.*$'})['regex'] }}"
+                                                                       value="{{ custom_ssl_key_data }}"
+                                                                       data-upload-target="#custom-ssl-key-data-upload"
+                                                                       data-manual-target="#custom-ssl-key-data-manual"
+                                                                       {% if use_custom_ssl == "no" %}disabled{% endif %} />
+                                                                <div class="position-relative plugin-setting-file-upload-container">
+                                                                    <div class="input-group">
+                                                                        <input id="custom-ssl-key-data-upload"
+                                                                               type="file"
+                                                                               class="form-control plugin-setting-file-upload"
+                                                                               data-file-input="#CUSTOM_SSL_KEY_DATA"
+                                                                               aria-labelledby="label-CUSTOM_SSL_KEY_DATA"
+                                                                               accept=".pem,.key,.txt"
+                                                                               {% if use_custom_ssl == "no" %}disabled{% endif %} />
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-secondary plugin-setting-file-mode-toggle"
+                                                                                data-file-input="#CUSTOM_SSL_KEY_DATA"
+                                                                                data-mode="upload"
+                                                                                data-upload-label="Switch to text editor"
+                                                                                data-manual-label="Back to file upload"
+                                                                                data-bs-toggle="tooltip"
+                                                                                data-bs-placement="top"
+                                                                                data-bs-original-title="Switch to text editor"
+                                                                                aria-label="Switch to text editor"
+                                                                                {% if use_custom_ssl == "no" %}disabled{% endif %}>
+                                                                            <i class="bx bx-edit-alt"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <textarea id="custom-ssl-key-data-manual"
+                                                                          class="form-control mt-2 d-none plugin-setting-file-manual"
+                                                                          rows="6"
+                                                                          data-file-input="#CUSTOM_SSL_KEY_DATA"
+                                                                          placeholder="Paste or edit the key data here..."
+                                                                          aria-labelledby="label-CUSTOM_SSL_KEY_DATA"
+                                                                          {% if use_custom_ssl == "no" %}disabled{% endif %}>{{ custom_ssl_key_data }}</textarea>
+                                                                <small class="text-muted d-block mt-1 plugin-setting-file-status"
+                                                                       data-empty-text="No file selected">
+                                                                    {% if custom_ssl_key_data %}
+                                                                        Current content loaded ({{ custom_ssl_key_data|length }} chars)
+                                                                    {% else %}
+                                                                        No file selected
+                                                                    {% endif %}
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <input id="SERVER_NAME"
+                                                   name="SERVER_NAME"
+                                                   type="hidden"
+                                                   value="{{ ui_reverse_proxy }}" />
+                                            <input id="REVERSE_PROXY_URL"
+                                                   name="REVERSE_PROXY_URL"
+                                                   type="hidden"
+                                                   value="{{ ui_reverse_proxy_url }}" />
+                                            <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                                               data-i18n="setup.status.reverse_proxy_configured">
+                                                ↪️ A reverse proxy is already configured for the web interface, please proceed to the next step
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                    <div id="navs-steps-3"
+                                         class="ps-2 pe-2 tab-pane fade"
+                                         role="tabpanel"
+                                         data-step="3"
+                                         aria-labelledby="navs-steps-3-tab">
+                                        <div class="pro-alert alert alert-primary" role="alert">
+                                            <h5 class="alert-heading fw-bold d-flex align-items-center courier-prime">
+                                                <img class='me-2'
+                                                     src="{{ pro_diamond_url }}"
+                                                     alt="Pro plugin"
+                                                     width="24px">
+                                                <span class="text-primary shine">BunkerWeb PRO free trial</span>
+                                            </h5>
+                                            <p class="mb-0 mt-2 text-primary">
+                                                Want to quickly test BunkerWeb PRO for one month? Use the code <strong>freetrial</strong> when placing your order on the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc"
+    target="_blank"
+    rel="noopener"
+    class="alert-link">BunkerWeb panel</a> or by <a href="https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=ui"
+    target="_blank"
+    rel="noopener"
+    class="alert-link">clicking here</a> to directly apply the promo code (will be effective at checkout).
+                                            </p>
+                                        </div>
+                                        <div class="pt-1 pb-4">
+                                            <h5 class="mb-1 fw-bold" data-i18n="setup.step3.title">Upgrade to PRO</h5>
+                                            <p class="card-subtitle text-muted" data-i18n="setup.step3.subtitle">
+                                                Unlock advanced features and get the most out of BunkerWeb.
+                                            </p>
+                                        </div>
+                                        <div class="row justify-content-center">
+                                            <div class="col-12 col-md-10 col-lg-8">
+                                                {% if pro_license_key %}
+                                                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                                                       data-i18n="setup.status.pro_license_key_exists">
+                                                        ⭐ A PRO license key is already configured, please proceed to the next step.
+                                                    </p>
+                                                {% else %}
+                                                    <div class="mb-4">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <label id="label-PRO_LICENSE_KEY"
+                                                                   for="PRO_LICENSE_KEY"
+                                                                   class="form-label fw-semibold text-truncate"
+                                                                   data-i18n="form.label.license_key">
+                                                                License Key
+                                                            </label>
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="Enter your PRO license key to activate PRO features"
+                                                                      data-i18n="tooltip.license_key">
+                                                                    <span class="bx bx-question-mark bx-xs"></span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <input id="PRO_LICENSE_KEY"
+                                                               name="PRO_LICENSE_KEY"
+                                                               type="password"
+                                                               class="form-control plugin-setting mt-1"
+                                                               aria-labelledby="label-PRO_LICENSE_KEY"
+                                                               pattern="^.*$"
+                                                               data-confetti-src="{{ url_for('static', filename='libs/canvas-confetti/confetti.browser.min.js') }}" />
+                                                    </div>
+                                                    <div class="pro-card card mb-4 p-0">
+                                                        <div class="card-body">
+                                                            <h6 class="mb-3 fw-bold" data-i18n="setup.step3.label.pro_benefits">PRO Benefits</h6>
+                                                            <ul class="list-group list-group-flush">
+                                                                <li class="list-group-item">
+                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime" data-i18n="setup.step3.pro_benefit_1_title">Access to all PRO features</strong>: <span data-i18n="setup.step3.pro_benefit_1_description">Unlock all advanced features including enhanced security, performance, and management tools.</span>
+                                                                </li>
+                                                                <li class="list-group-item">
+                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime" data-i18n="setup.step3.pro_benefit_2_title">Technical support from maintainers</strong>: <span data-i18n="setup.step3.pro_benefit_2_description">Get priority support from the BunkerWeb team for any issues or questions you may have.</span>
+                                                                </li>
+                                                                <li class="list-group-item">
+                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime" data-i18n="setup.step3.pro_benefit_3_title">Custom development</strong>: <span data-i18n="setup.step3.pro_benefit_3_description">Tailored solutions to meet your specific needs.</span>
+                                                                </li>
+                                                                <li class="list-group-item">
+                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime" data-i18n="setup.step3.pro_benefit_4_title">Custom consulting</strong>: <span data-i18n="setup.step3.pro_benefit_4_description">Expert advice to optimize your BunkerWeb setup.</span>
+                                                                </li>
+                                                            </ul>
+                                                            <div class="text-center mt-3">
+                                                                <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=ui"
+                                                                   role="button"
+                                                                   target="_blank"
+                                                                   rel="noopener"
+                                                                   class="btn btn-bw-green"
+                                                                   data-i18n="link.more_info">More info</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="navs-steps-4"
+                                         class="ps-2 pe-2 tab-pane fade"
+                                         role="tabpanel"
+                                         data-step="4"
+                                         aria-labelledby="navs-steps-4-tab">
+                                        <div class="pt-1 pb-4">
+                                            <h5 class="mb-1 fw-bold" data-i18n="setup.step4.title">Overview</h5>
+                                            <p class="card-subtitle text-muted" data-i18n="setup.step4.subtitle">Review your settings</p>
+                                        </div>
+                                        <div class="d-flex justify-content-center pb-0 mb-4">
+                                            <div class="col-12 col-md-8">
+                                                {% set input_required = false %}
+                                                {% set input_readonly = true %}
+                                                {% if not ui_user %}
+                                                    <div class="pb-3">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <label id="label-overview_username"
+                                                                   for="overview_username"
+                                                                   class="form-label fw-semibold text-truncate"
+                                                                   data-i18n="form.label.admin_username">
+                                                                Admin Username
+                                                            </label>
+                                                        </div>
+                                                        <input id="overview_username"
+                                                               name="overview_username"
+                                                               type="text"
+                                                               class="form-control plugin-setting mt-1"
+                                                               aria-labelledby="label-overview_username"
+                                                               pattern="^.{1,256}$"
+                                                               readonly />
+                                                    </div>
+                                                    <div class="pb-3">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <label id="label-overview_email"
+                                                                   for="overview_email"
+                                                                   class="form-label fw-semibold text-truncate"
+                                                                   data-i18n="form.label.admin_email">
+                                                                Admin Email
+                                                            </label>
+                                                        </div>
+                                                        <input id="overview_email"
+                                                               name="overview_email"
+                                                               type="text"
+                                                               class="form-control plugin-setting mt-1"
+                                                               aria-labelledby="label-overview_email"
+                                                               pattern="^.*$"
+                                                               readonly />
+                                                    </div>
+                                                    <div class="pb-3">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <label id="label-overview_password"
+                                                                   for="overview_password"
+                                                                   class="form-label fw-semibold text-truncate"
+                                                                   data-i18n="form.label.admin_password">
+                                                                Admin Password
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-password-toggle">
+                                                            <div class="input-group input-group-merge mt-1">
+                                                                <input class="form-control plugin-setting"
+                                                                       type="password"
+                                                                       id="overview_password"
+                                                                       name="overview_password"
+                                                                       aria-labelledby="label-overview_password"
+                                                                       autocomplete="off"
+                                                                       readonly
+                                                                       pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$" />
+                                                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                {% if not ui_reverse_proxy %}
+                                                    <div class="pb-3">
+                                                        <h6 class="mt-2 mb-2 fw-bold" data-i18n="setup.step4.label.final_url">BunkerWeb UI final URL</h6>
+                                                        {% set setting = "SERVER_NAME + REVERSE_PROXY_HOST" %}
+                                                        {% set setting_data = {"type": "text", "id": "overview_service_url", "regex": "^.+$"} %}
+                                                        {% include "models/input_setting.html" %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-center text-center mt-4">
+                                            {% if not ui_user %}
+                                                <div>
+                                                    <i class="bx bx-check text-success"></i> <span data-i18n="setup.status.secure_password">Secure password</span>
+                                                </div>
+                                            {% endif %}
+                                            {% if not ui_reverse_proxy %}
+                                                <div id="overview-unique-server-name" class="ms-4">
+                                                    <i class="bx bx-question-mark text-warning"></i> <span data-i18n="setup.status.unique_server_name">Unique Server Name</span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2 position-relative">
+                                <button id="previous-step"
+                                        class="btn btn-primary btn-prev previous-step disabled">
+                                    <i class="bx bx-chevron-left bx-sm ms-sm-n2"></i>
+                                    <span class="align-middle d-sm-inline-block d-none"
+                                          data-i18n="step.previous">Previous</span>
+                                </button>
+                                <div class="join-newsletter position-absolute bottom-0 start-50 translate-middle-x">
+                                    <h5 class="mb-3 text-primary" data-i18n="newsletter.title">Join the Newsletter</h5>
+                                    <form id="setup-newsletter-form"
+                                          action="https://sibforms.com/serve/MUIFAHoWe6WZdJ2ergvcJd8d2gn5T_x7bUzVM6jJd1FmAMfS6v-S9cUN3Iqw6DFiq7mRlDMvTXSIM9voEv8sCkZmEhtoDukSdI4BomhnTtgJAMXFkXUIj07KNw5gBWJ-1kPYCoSJlcabngBdufuqPnzGQ87UMecHcke3Hv2-AgAZOMYbCgKg2mx4ki8vhCkQtEpfBQhNZY22UY5y"
+                                          target="_blank"
+                                          method="POST">
+                                        <div class="form-check mb-3">
+                                            <input id="newsletter-email" type="hidden" name="EMAIL" required />
+                                            <input id="newsletter-email-check"
+                                                   type="hidden"
+                                                   name="email_address_check"
+                                                   value="" />
+                                            <input id="newsletter-locale" type="hidden" name="locale" value="en" />
+                                            <input id="setup-subscribe-newsletter"
+                                                   type="checkbox"
+                                                   class="form-check-input"
+                                                   name="OPT_IN"
+                                                   required />
+                                            <label class="form-check-label" for="privacyPolicyCheck">
+                                                <span data-i18n="newsletter.legal_agreement">I want to subscribe to the newsletter and I've read and agree to the:&nbsp;</span>
+                                                <a class="fst-italic"
+                                                   href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
+                                                   target="_blank"
+                                                   rel="noopener"
+                                                   data-i18n="link.privacy_policy">privacy policy</a>
+                                            </label>
+                                        </div>
+                                    </form>
+                                </div>
+                                <button type="button" class="btn btn-outline-bw-green save-settings d-none">
+                                    <i class="bx bx-save bx-sm ms-sm-n2"></i>
+                                    <span class="align-middle d-sm-inline-block d-none ms-sm-1"
+                                          data-i18n="button.setup">Setup</span>
+                                </button>
+                                <button id="next-step" class="btn btn-primary btn-next next-step">
+                                    <span class="align-middle d-sm-inline-block d-none me-sm-1"
+                                          data-i18n="step.next">Next</span>
+                                    <i class="bx bx-chevron-right bx-sm me-sm-n2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /Setup -->
+                    </div>
+                </div>
+                <!-- prettier-ignore -->
+                {% include "sidebar-news.html" %}
+            </div>
+        </div>
+        <div id="feedback-toast"
+             class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border"
+             role="alert"
+             aria-live="assertive"
+             aria-atomic="true"
+             data-bs-autohide="true"
+             data-bs-delay="10000">
+            <div class="toast-header d-flex align-items-center">
+                <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
+                <span class="fw-medium me-auto">BunkerWeb Forever</span>
+                <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="toast"
+                        aria-label="Close"
+                        data-i18n="aria.label.close"></button>
+            </div>
+            <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious 👀</div>
+        </div>
+        {% if not ui_reverse_proxy %}
+            <div class="modal fade"
+                 id="modal-confirm-dns"
+                 data-bs-backdrop="static"
+                 tabindex="-1"
+                 aria-hidden="true"
+                 role="dialog">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 id="dns-check-title"
+                                class="modal-title"
+                                data-i18n="modal.title.server_name_not_unique">Server name is not unique</h5>
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"
+                                    data-i18n="aria.label.close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="dns-check-result"
+                                 class="alert alert-danger text-center"
+                                 role="alert"
+                                 data-i18n="modal.body.confirm_next_step">
+                                Are you sure you want to proceed to the next step?
+                            </div>
+                            <p class="mt-1 mb-0 text-center">
+                                <span data-i18n="modal.body.next_step_in_case_of_issue">In case of issues, you can manually accept the unsafe cert:</span> <a id="check-url"
+    class="fw-semibold"
+    href="https://www.example.com/setup/check"
+    target="_blank"
+    rel="noreferrer"
+    data-bs-toggle="tooltip"
+    data-bs-placement="top"
+    data-bs-original-title='If the shown text is "ok", that means that the server name is available'
+    data-i18n="tooltip.dns_check_url"><span data-i18n="link.here">here</span></a>.
+                            </p>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button id="confirm-dns"
+                                    class="btn btn-outline-danger next-step me-2"
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.proceed">Proceed</button>
+                            <button type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        <div class="modal fade"
+             id="loadingModal"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-transparent border-0 shadow-none">
+                    <div class="modal-body text-center">
+                        <div class="d-flex justify-content-center align-items-center w-100">
+                            <lottie-player src="{{ url_for('static', filename='json/periscop.min.json') }}" background="transparent"  speed="1" style="width: 300px; height: 300px;" class="img-fluid" loop autoplay></lottie-player>
+                        </div>
+                        <p class="mt-3 text-white" data-i18n="status.setting_up_bunkerweb">Setting up your BunkerWeb, please wait...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/lottie-player/lottie-player.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/setup.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
+{% endblock %}
