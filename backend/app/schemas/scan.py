@@ -13,10 +13,12 @@ class ScanRunRequest(BaseModel):
 class NormalizedFinding(BaseModel):
     source: Literal["zap", "nuclei", "sast"]
     severity: str = Field(default="unknown")
+    title: str = Field(default="")
     description: str = Field(default="")
     timestamp: datetime
 
 
 class ScanRunResponse(BaseModel):
+    scan_run_id: str
     tenant_id: str
     findings: list[NormalizedFinding]

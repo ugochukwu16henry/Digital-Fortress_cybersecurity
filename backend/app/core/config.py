@@ -7,6 +7,11 @@ class Settings(BaseSettings):
     api_prefix: str = "/api/v1"
 
     database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/digital_fortress"
+    redis_url: str = "redis://localhost:6379/0"
+    event_channel: str = "digital-fortress.events"
+
+    nuclei_use_docker: bool = True
+    nuclei_docker_container: str = "df-nuclei"
     jwt_secret: str = "change-me"
     jwt_algorithm: str = "HS256"
 

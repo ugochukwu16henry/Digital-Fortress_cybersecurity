@@ -1,0 +1,77 @@
+services:
+  bw:
+    image: bunkerity/bunkerweb:1.5.12
+    container_name: df-bunkerweb
+    ports:
+      - "80:8080"
+      - "443:8443"
+    environment:
+      API_WHITELIST_IP: 127.0.0.1/32
+      AUTO_LETS_ENCRYPT: "yes"
+      USE_ANTIBOT: "yes"
+    networks:
+      - fortress-net
+
+  scanner:
+    image: projectdiscovery/nuclei:latest
+    container_name: df-nuclei
+    entrypoint: ["/bin/sh", "-c", "sleep infinity"]
+    volumes:
+      - ./scans:/app/results
+    networks:
+      - fortress-net
+
+  db:
+    image: postgres:15-alpine
+    container_name: df-postgres
+    environment:
+      POSTGRES_DB: digital_fortress
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - df-postgres-data:/var/lib/postgresql/data
+      - ./backend/sql:/docker-entrypoint-initdb.d
+    networks:
+      - fortress-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: df-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - fortress-net
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: df-api
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/digital_fortress
+      REDIS_URL: redis://redis:6379/0
+      EVENT_CHANNEL: digital-fortress.events
+      NUCLEI_USE_DOCKER: "true"
+      NUCLEI_DOCKER_CONTAINER: df-nuclei
+      JWT_SECRET: change-me
+      COMPLIANCE_MODE_DEFAULT: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+      - scanner
+      - bw
+    networks:
+      - fortress-net
+
+networks:
+  fortress-net:
+    driver: bridge
+
+volumes:
+  df-postgres-data:

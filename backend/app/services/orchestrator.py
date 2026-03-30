@@ -2,6 +2,7 @@ import json
 import subprocess
 from datetime import datetime, timezone
 
+from app.core.config import settings
 from app.schemas.scan import NormalizedFinding
 
 
@@ -10,9 +11,34 @@ class DigitalFortressScanner:
         self.target = target_url
 
     def run_nuclei(self) -> str:
-        cmd = ["nuclei", "-u", self.target, "-json"]
-        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
-        return result.stdout
+        docker_cmd = [
+            "docker",
+            "exec",
+            settings.nuclei_docker_container,
+            "nuclei",
+            "-u",
+            self.target,
+            "-json",
+            "-silent",
+        ]
+        host_cmd = ["nuclei", "-u", self.target, "-json", "-silent"]
+
+        if settings.nuclei_use_docker:
+            try:
+                result = subprocess.run(docker_cmd, capture_output=True, text=True, check=False, timeout=600)
+                if result.returncode == 0:
+                    return result.stdout
+            except (FileNotFoundError, subprocess.TimeoutExpired):
+                pass
+
+        try:
+            result = subprocess.run(host_cmd, capture_output=True, text=True, check=False, timeout=600)
+            if result.returncode == 0:
+                return result.stdout
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            return ""
+
+        return ""
 
     def run_zap(self) -> str:
         # TODO: Replace with ZAP API integration.
@@ -20,10 +46,16 @@ class DigitalFortressScanner:
 
 
 def normalize_finding(tool_name: str, raw_data: dict) -> NormalizedFinding:
+    info = raw_data.get("info", {}) if isinstance(raw_data.get("info"), dict) else {}
+    title = info.get("name") or raw_data.get("name") or raw_data.get("template-id") or ""
+    description = info.get("description") or raw_data.get("description") or ""
+    severity = info.get("severity") or raw_data.get("severity") or "unknown"
+
     return NormalizedFinding(
         source=tool_name,
-        severity=raw_data.get("severity", "unknown"),
-        description=raw_data.get("description", ""),
+        severity=str(severity).lower(),
+        title=str(title),
+        description=str(description),
         timestamp=datetime.now(timezone.utc),
     )
 
