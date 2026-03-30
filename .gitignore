@@ -43,4 +43,7 @@ logs/
 
 # Ignore secrets
 backend/.env
-backend/.env.*
+backend/.env.
+
+# Exclude problematic long path file (Windows limitation)
+dashboard/wazuh-dashboard-main/src/plugins/data_source_management/public/components/direct_query_data_sources_components/acceleration_creation/visual_editors/__snapshots__/query_visual_editor.test.tsx.snap

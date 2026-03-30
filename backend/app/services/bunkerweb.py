@@ -1,4 +1,4 @@
-import requests
+import httpx
 from app.core.config import settings
 
 class BunkerWebAPI:
@@ -12,7 +12,7 @@ class BunkerWebAPI:
         payload = {"ip": ip, "reason": reason}
         headers = {"Authorization": f"Bearer {self.api_key}"}
         try:
-            resp = requests.post(url, json=payload, headers=headers, timeout=self.timeout)
+            resp = httpx.post(url, json=payload, headers=headers, timeout=self.timeout)
             return resp.status_code == 200
         except Exception:
             return False
@@ -22,7 +22,7 @@ class BunkerWebAPI:
         payload = {"ip": ip, "reason": reason}
         headers = {"Authorization": f"Bearer {self.api_key}"}
         try:
-            resp = requests.post(url, json=payload, headers=headers, timeout=self.timeout)
+            resp = httpx.post(url, json=payload, headers=headers, timeout=self.timeout)
             return resp.status_code == 200
         except Exception:
             return False
