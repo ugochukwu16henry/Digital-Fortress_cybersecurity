@@ -7,7 +7,13 @@ from app.core.config import settings
 from app.db.models import Organization
 
 
-engine = create_engine(settings.database_url, pool_pre_ping=True)
+def _normalize_database_url(url: str) -> str:
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://") :]
+    return url
+
+
+engine = create_engine(_normalize_database_url(settings.database_url), pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
