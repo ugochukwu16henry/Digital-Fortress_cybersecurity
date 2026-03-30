@@ -15,6 +15,7 @@ from app.schemas.honeytoken import (
     HoneytokenGenerateResponse,
 )
 from app.services.event_bus import publish_incident_created_event
+from app.services.bunkerweb import BunkerWebAPI
 
 router = APIRouter(prefix="/honeytokens", tags=["honeytokens"])
 
@@ -121,6 +122,11 @@ def honeytoken_callback(
         actor_id=actor.id,
         honeytoken_id=honeytoken.id,
     )
+
+    # Call BunkerWeb to block the IP (if present)
+    if captured_ip:
+        bunkerweb = BunkerWebAPI()
+        bunkerweb.block_ip(captured_ip, reason="Honeytoken triggered incident")
 
     return HoneytokenCallbackResponse(
         incident_id=incident.id,
