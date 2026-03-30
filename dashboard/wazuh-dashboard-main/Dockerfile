@@ -13,10 +13,12 @@ RUN apt-get update && \
 RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-linux.gpg \
   && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
   && apt-get update \
-  && apt-get install -y rsync jq bsdtar google-chrome-stable --no-install-recommends python3-pip \
+  && apt-get install -y rsync jq libarchive-tools google-chrome-stable --no-install-recommends python3-pip \
   && pip3 install --no-cache-dir awscli \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN groupadd -r opensearch-dashboards && useradd -r -g opensearch-dashboards opensearch-dashboards && mkdir /home/opensearch-dashboards && chown opensearch-dashboards:opensearch-dashboards /home/opensearch-dashboards
 
+ENV OPENSEARCH_DASHBOARDS_PORT=8080
+EXPOSE 8080
 USER opensearch-dashboards
