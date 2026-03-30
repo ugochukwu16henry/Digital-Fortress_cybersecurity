@@ -1,0 +1,258 @@
+{
+  "id": "letsencrypt",
+  "name": "Let's Encrypt",
+  "description": "Automatic creation, renewal and configuration of Let's Encrypt certificates.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "AUTO_LETS_ENCRYPT": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Activate automatic Let's Encrypt mode.",
+      "id": "auto-lets-encrypt",
+      "label": "Automatic Let's Encrypt",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "LETS_ENCRYPT_PASSTHROUGH": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Pass through Let's Encrypt requests to the web server.",
+      "id": "lets-encrypt-passthrough",
+      "label": "Pass Through Let's Encrypt",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "EMAIL_LETS_ENCRYPT": {
+      "context": "multisite",
+      "default": "",
+      "help": "Email used for Let's Encrypt notification and in certificate.",
+      "id": "email-lets-encrypt",
+      "label": "Email Let's Encrypt",
+      "regex": "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+)?$",
+      "type": "text"
+    },
+    "LETS_ENCRYPT_SERVER": {
+      "context": "multisite",
+      "default": "letsencrypt",
+      "help": "Select the certificate authority server to use for certificate generation.",
+      "id": "lets-encrypt-server",
+      "label": "Certificate Authority Server",
+      "regex": "^(letsencrypt|zerossl)$",
+      "type": "select",
+      "select": ["letsencrypt", "zerossl"]
+    },
+    "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Optional ZeroSSL API key used by zerossl-bot. If empty, EMAIL_LETS_ENCRYPT is used to fetch EAB credentials.",
+      "id": "lets-encrypt-zerossl-api-key",
+      "label": "ZeroSSL API Key",
+      "regex": "^.*$",
+      "type": "password"
+    },
+    "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+      "context": "multisite",
+      "default": "3",
+      "help": "Number of retries for ZeroSSL API requests done by zerossl-bot (0 disables retries).",
+      "id": "lets-encrypt-zerossl-api-retry",
+      "label": "ZeroSSL API Retries",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
+    "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+      "context": "multisite",
+      "default": "2",
+      "help": "Delay in seconds between ZeroSSL API retries in zerossl-bot.",
+      "id": "lets-encrypt-zerossl-api-retry-delay",
+      "label": "ZeroSSL API Retry Delay",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
+    "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+      "context": "multisite",
+      "default": "5",
+      "help": "Connection timeout in seconds for ZeroSSL API requests in zerossl-bot.",
+      "id": "lets-encrypt-zerossl-api-connect-timeout",
+      "label": "ZeroSSL API Connect Timeout",
+      "regex": "^[1-9]\\d*$",
+      "type": "number"
+    },
+    "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+      "context": "multisite",
+      "default": "20",
+      "help": "Maximum total time in seconds for each ZeroSSL API request in zerossl-bot.",
+      "id": "lets-encrypt-zerossl-api-max-time",
+      "label": "ZeroSSL API Max Time",
+      "regex": "^[1-9]\\d*$",
+      "type": "number"
+    },
+    "LETS_ENCRYPT_CHALLENGE": {
+      "context": "multisite",
+      "default": "http",
+      "help": "The challenge type to use for Let's Encrypt (http or dns).",
+      "id": "lets-encrypt-challenge",
+      "label": "Challenge Type",
+      "regex": "^(http|dns)$",
+      "type": "select",
+      "select": ["http", "dns"]
+    },
+    "LETS_ENCRYPT_DNS_PROVIDER": {
+      "context": "multisite",
+      "default": "",
+      "help": "The DNS provider to use for DNS challenges.",
+      "id": "auto-lets-encrypt-dns-provider",
+      "label": "DNS Provider",
+      "regex": "^[a-z0-9]*$",
+      "type": "select",
+      "select": [
+        "",
+        "bunny",
+        "cloudns",
+        "cloudflare",
+        "desec",
+        "digitalocean",
+        "domainoffensive",
+        "domeneshop",
+        "dnsimple",
+        "dnsmadeeasy",
+        "duckdns",
+        "dynu",
+        "gandi",
+        "gehirn",
+        "godaddy",
+        "google",
+        "hetzner",
+        "infomaniak",
+        "ionos",
+        "linode",
+        "luadns",
+        "njalla",
+        "nsone",
+        "ovh",
+        "pdns",
+        "rfc2136",
+        "route53",
+        "sakuracloud",
+        "scaleway",
+        "transip"
+      ]
+    },
+    "LETS_ENCRYPT_DNS_PROPAGATION": {
+      "context": "multisite",
+      "default": "default",
+      "help": "The time to wait for DNS propagation in seconds for DNS challenges.",
+      "id": "lets-encrypt-dns-propagation",
+      "label": "DNS Propagation",
+      "regex": "^(default|\\d+)$",
+      "type": "text"
+    },
+    "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+      "context": "multisite",
+      "default": "",
+      "help": "Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges. (Values can also be base64 encoded or it can be a base64 encoded json object)",
+      "id": "lets-encrypt-dns-credential-item",
+      "label": "Credential Item",
+      "regex": "^.*",
+      "type": "password",
+      "multiple": "lets-encrypt-dns-credential-item"
+    },
+    "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Automatically decode base64 encoded DNS provider credentials. When enabled, credentials matching base64 format are decoded before use (except for rfc2136 provider). Disable if your credentials are intentionally base64 strings.",
+      "id": "lets-encrypt-dns-credential-decode-base64",
+      "label": "Decode Base64 DNS Credentials",
+      "regex": "^(yes|no)$",
+      "type": "check",
+      "multiple": "lets-encrypt-dns-credential-item"
+    },
+    "USE_LETS_ENCRYPT_WILDCARD": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains. (Only available with DNS challenges)",
+      "id": "use-lets-encrypt-wildcard",
+      "label": "Wildcard Certificates",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "USE_LETS_ENCRYPT_STAGING": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.",
+      "id": "use-lets-encrypt-staging",
+      "label": "Use Let's Encrypt Staging",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+      "context": "global",
+      "default": "no",
+      "help": "Clear old certificates when renewing.",
+      "id": "lets-encrypt-clear-old-certs",
+      "label": "Clear old certificates when they are no longer needed",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "LETS_ENCRYPT_PROFILE": {
+      "context": "multisite",
+      "default": "classic",
+      "help": "Select the certificate profile to use with Let's Encrypt. 'classic' is a general-purpose certificate with 90-day lifetime and broad compatibility. 'tlsserver' is optimized for TLS server authentication with 90-day lifetime and smaller payload. 'shortlived' offers 7-day certificates for enhanced security in automated environments.",
+      "id": "lets-encrypt-profile",
+      "label": "Certificate Profile",
+      "regex": "^(classic|tlsserver|shortlived)$",
+      "type": "select",
+      "select": ["classic", "tlsserver", "shortlived"]
+    },
+    "LETS_ENCRYPT_CUSTOM_PROFILE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Custom certificate profile to use with ACME servers that support non-standard profiles. Overrides LETS_ENCRYPT_PROFILE if set.",
+      "id": "lets-encrypt-custom-profile",
+      "label": "Custom Certificate Profile (ACME)",
+      "regex": "^([a-zA-Z0-9_-]{0,64})$",
+      "type": "text"
+    },
+    "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Disable certificate requests for domains matching the Public Suffix List (recommended, default: yes).",
+      "id": "lets-encrypt-disable-public-suffixes",
+      "label": "Disable Public Suffixes (PSL Blacklist)",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "LETS_ENCRYPT_MAX_RETRIES": {
+      "context": "multisite",
+      "default": "0",
+      "help": "Number of times to retry certificate generation on failure (0 disables retries).",
+      "id": "lets-encrypt-max-retries",
+      "label": "Maximum Retries",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
+    "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+      "context": "global",
+      "default": "no",
+      "help": "Run certificate requests concurrently in the certbot-new job (may increase the risk of rate limits).",
+      "id": "lets-encrypt-concurrent-requests",
+      "label": "Concurrent Certificate Requests",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    }
+  },
+  "jobs": [
+    {
+      "name": "certbot-new",
+      "file": "certbot-new.py",
+      "every": "once",
+      "reload": false
+    },
+    {
+      "name": "certbot-renew",
+      "file": "certbot-renew.py",
+      "every": "day",
+      "reload": true
+    }
+  ]
+}

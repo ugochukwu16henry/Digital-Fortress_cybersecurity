@@ -1,0 +1,11 @@
+.git
+.idea/
+.vscode/
+**/__pycache__/
+
+env/
+src/deps/tmp_venv/
+tests/
+**/Dockerfile
+src/common/README*.md
+src/common/core/*/README*.md

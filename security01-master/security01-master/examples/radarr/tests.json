@@ -1,0 +1,14 @@
+{
+  "name": "radarr",
+  "kinds": ["docker", "autoconf"],
+  "delay": 180,
+  "timeout": 120,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "radarr",
+      "tls": "www.example.com"
+    }
+  ]
+}

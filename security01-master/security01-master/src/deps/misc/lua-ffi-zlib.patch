@@ -1,0 +1,14 @@
+@@ -97,12 +97,3 @@
+ 
+-local zlib
+-if ffi.os == "Windows" then
+-    zlib = ffi.load("zlib1")
+-elseif ffi.os == "OSX" then
+-    zlib = ffi.load("z")
+-elseif ffi.os == "Linux" then
+-    zlib = ffi.load("libz.so.1")
+-else
+-    error("lua-ffi-zlib doesn't support platform: " .. ffi.os)
+-end
++local zlib = ffi.load("/usr/share/bunkerweb/deps/lib/lua/libz.so")
+ 

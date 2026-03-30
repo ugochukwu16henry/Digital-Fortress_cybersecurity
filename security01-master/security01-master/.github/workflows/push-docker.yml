@@ -1,0 +1,105 @@
+name: Push image (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      IMAGE:
+        required: true
+        type: string
+      TAGS:
+        required: true
+        type: string
+      CACHE_FROM:
+        required: true
+        type: string
+      DOCKERFILE:
+        required: true
+        type: string
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_TOKEN:
+        required: true
+      ARM_SSH_KEY:
+        required: true
+      ARM_SSH_CONFIG:
+        required: true
+      ARM_SSH_IP:
+        required: true
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Check out repository code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Login to Docker Hub
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to ghcr
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup SSH for ARM node
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
+          chmod 600 ~/.ssh/id_rsa_arm
+          echo "$SSH_CONFIG" | sed "s/SSH_IP/$SSH_IP/g" > ~/.ssh/config
+          # Enhanced keepalive and timeout settings for long-running builds
+          cat >> ~/.ssh/config << 'EOF'
+          ServerAliveInterval 15
+          ServerAliveCountMax 20
+          TCPKeepAlive yes
+          ConnectTimeout 30
+          ConnectionAttempts 3
+          ControlMaster auto
+          ControlPath ~/.ssh/control-%C
+          ControlPersist 1h
+          StrictHostKeyChecking no
+          EOF
+        env:
+          SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+          SSH_IP: ${{ secrets.ARM_SSH_IP }}
+          SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      - name: Setup Buildx (ARM)
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+        with:
+          endpoint: ssh://root@arm
+          platforms: linux/arm64,linux/arm/v7
+          buildkitd-flags: --debug
+      # Sanitize tags (replace ~ with - for valid Docker/GHCR tag names)
+      - name: Sanitize tags
+        id: sanitize
+        run: |
+          TAGS="${{ inputs.TAGS }}"
+          echo "tags=${TAGS//\~/-}" >> "$GITHUB_OUTPUT"
+      # Compute metadata
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+        with:
+          images: bunkerity/${{ inputs.IMAGE }}
+      # Build and push
+      - name: Build and push
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        with:
+          context: .
+          file: ${{ inputs.DOCKERFILE }}
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
+          push: true
+          tags: ${{ steps.sanitize.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: |
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-amd64
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-386
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-arm64
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-armv7
+          outputs: type=registry,oci-mediatypes=true,compression=zstd
+          provenance: true
+          sbom: true

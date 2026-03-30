@@ -1,0 +1,83 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+exclude: (^src/ui/client|^LICENSE.md$|^src/VERSION$|^env/|^examples/community/|^src/(bw/misc/root-ca.pem$|deps/src/|common/core/modsecurity/files|ui/static/(js/(editor/|utils/purify/|tsparticles\.bundle\.min\.js)|css/dashboard\.css))|\.(svg|drawio|patch\d?|ascii|tf|tftpl|key)$)
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # frozen: v6.0.0
+    hooks:
+      - id: requirements-txt-fixer
+        name: Fix requirements.txt and requirements.in files
+        description: Sorts entries in requirements.txt and requirements.in files.
+        files: (requirements|constraints).*\.(txt|in)$
+        exclude: ^src/scheduler/requirements.in$
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        exclude: ^(mkdocs.*.yml|examples/bigbluebutton/docker-compose.yml)$
+        args: ["--allow-multiple-documents"]
+      - id: check-case-conflict
+
+  - repo: https://github.com/psf/black
+    rev: 05f0a8ce1f71fbb36e1e032d3b518c7b945089a2 # frozen: 25.11.0
+    hooks:
+      - id: black
+        name: Black Python Formatter
+        language_version: python3.10
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: Prettier
+        entry: prettier --write
+        language: system
+        types: [text]
+        files: \.(js|ts|jsx|tsx|css|less|html|json|markdown|md|yaml|yml)$
+
+  - repo: https://github.com/JohnnyMorganz/StyLua
+    rev: 3701d2cb65198ec748d3a593628625be9f91fe27 # frozen: v2.3.1
+    hooks:
+      - id: stylua-github
+        exclude: ^src/(bw/lua/middleclass.lua$|common/core/antibot/captcha.lua$|common/core/crowdsec/lib)
+
+  - repo: https://github.com/lunarmodules/luacheck
+    rev: cc089e3f65acdd1ef8716cc73a3eca24a6b845e4 # frozen: v1.2.0
+    hooks:
+      - id: luacheck
+        exclude: ^src/(bw/lua/middleclass.lua$|common/core/antibot/captcha.lua$|common/core/crowdsec/lib)
+        args: ["--std", "min", "--codes", "--ranges", "--no-cache"]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: d93590f5be797aabb60e3b09f2f52dddb02f349f # frozen: 7.3.0
+    hooks:
+      - id: flake8
+        name: Flake8 Python Linter
+        args: ["--max-line-length=160", "--ignore=E266,E402,E501,E722,W503"]
+        exclude: ^src/common/db/alembic/(mariadb|mysql|postgresql|sqlite)_versions
+
+  - repo: https://github.com/dosisod/refurb
+    rev: 854db6cdfab04b7f4911d9cba6bfc084f086ea92 # frozen: v2.2.0
+    hooks:
+      - id: refurb
+        name: Refurb Python Refactoring Tool
+        exclude: ^tests/
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: 63c8f8312b7559622c0d82815639671ae42132ac # frozen: v2.4.1
+    hooks:
+      - id: codespell
+        name: Codespell Spell Checker
+        exclude: (^src/(ui/templates|common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|src/ui/app/static/(fonts|libs)/.+|src/ui/app/static/locales/.+|docs/.+/.+|src/common/README\..+\.md|src/common/core/.+/README\..+\.md)$
+        entry: codespell --ignore-regex="(tabEl|Widgits|fpr|TE|STING|SUPPOR|FO|EXPEC)" --skip CHANGELOG.md,CODE_OF_CONDUCT.md,src/ui/client/build.py,src/ui/app/static/json/countries.geojson,src/ui/app/static/json/countries.topojson,src/ui/app/static/js/pages/bans.js,src/ui/app/static/json/periscop.min.json,src/ui/app/static/json/blockhaus.min.json,src/ui/app/routes/reports.py,src/ui/app/static/js/pages/reports.js,docs/json2md.py
+        language: python
+        types: [text]
+
+  # - repo: https://github.com/gitleaks/gitleaks
+  #   rev: ee6b38352380ce52369d16b7873093c4b8bf829b # frozen: v8.24.3
+  #   hooks:
+  #     - id: gitleaks
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: 99470f5e12208ff0fb17ab81c3c494f7620a1d8d # frozen: v0.11.0
+    hooks:
+      - id: shellcheck
+        exclude: ^tests/

@@ -1,0 +1,47 @@
+{
+  "id": "errors",
+  "name": "Errors",
+  "description": "Manage default error pages",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "ERRORS": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).",
+      "id": "errors",
+      "label": "Errors",
+      "regex": "^( *([1-5]\\d{2})=[^ ]+ *)*$",
+      "type": "multivalue"
+    },
+    "INTERCEPTED_ERROR_CODES": {
+      "context": "multisite",
+      "default": "400 401 403 404 405 413 429 500 501 502 503 504",
+      "help": "List of HTTP error code intercepted by BunkerWeb, separated with spaces.",
+      "id": "intercepted-error-codes",
+      "label": "Intercepted error codes",
+      "regex": "^( *([1-5]\\d{2}) *)*$",
+      "type": "multiselect",
+      "multiselect": [
+        { "id": "301", "label": "301 - Moved Permanently", "value": "301" },
+        { "id": "302", "label": "302 - Found", "value": "302" },
+        { "id": "400", "label": "400 - Bad Request", "value": "400" },
+        { "id": "401", "label": "401 - Unauthorized", "value": "401" },
+        { "id": "403", "label": "403 - Forbidden", "value": "403" },
+        { "id": "404", "label": "404 - Not Found", "value": "404" },
+        { "id": "405", "label": "405 - Method Not Allowed", "value": "405" },
+        {
+          "id": "413",
+          "label": "413 - Request Entity Too Large",
+          "value": "413"
+        },
+        { "id": "429", "label": "429 - Too Many Requests", "value": "429" },
+        { "id": "500", "label": "500 - Internal Server Error", "value": "500" },
+        { "id": "501", "label": "501 - Not Implemented", "value": "501" },
+        { "id": "502", "label": "502 - Bad Gateway", "value": "502" },
+        { "id": "503", "label": "503 - Service Unavailable", "value": "503" },
+        { "id": "504", "label": "504 - Gateway Timeout", "value": "504" }
+      ]
+    }
+  }
+}

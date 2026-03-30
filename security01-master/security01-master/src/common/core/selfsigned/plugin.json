@@ -1,0 +1,55 @@
+{
+  "id": "selfsigned",
+  "name": "Self-signed certificate",
+  "description": "Generate self-signed certificate.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "GENERATE_SELF_SIGNED_SSL": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Generate and use self-signed certificate.",
+      "id": "generate-self-signed-ssl",
+      "label": "Activate self-signed certificate",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "SELF_SIGNED_SSL_ALGORITHM": {
+      "context": "multisite",
+      "default": "ec-prime256v1",
+      "help": "Algorithm to use for self-signed certificate.",
+      "id": "self-signed-ssl-algorithm",
+      "label": "Certificate algorithm",
+      "regex": "^(ec-(prime256v1|secp384r1)|(rsa-(2048|4096)))$",
+      "type": "select",
+      "select": ["ec-prime256v1", "ec-secp384r1", "rsa-2048", "rsa-4096"]
+    },
+    "SELF_SIGNED_SSL_EXPIRY": {
+      "context": "multisite",
+      "default": "365",
+      "help": "Self-signed certificate expiry in days.",
+      "id": "self-signed-ssl-expiry",
+      "label": "Certificate expiry",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
+    "SELF_SIGNED_SSL_SUBJ": {
+      "context": "multisite",
+      "default": "/CN=www.example.com/",
+      "help": "Self-signed certificate subject.",
+      "id": "self-signed-ssl-subj",
+      "label": "Certificate subject",
+      "regex": "^/[^/]+/$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    {
+      "name": "self-signed",
+      "file": "self-signed.py",
+      "every": "day",
+      "reload": true,
+      "async": true
+    }
+  ]
+}

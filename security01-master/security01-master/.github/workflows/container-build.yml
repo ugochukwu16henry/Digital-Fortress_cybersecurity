@@ -1,0 +1,160 @@
+name: Build container (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      RELEASE:
+        required: true
+        type: string
+      ARCH:
+        required: true
+        type: string
+      IMAGE:
+        required: true
+        type: string
+      DOCKERFILE:
+        required: true
+        type: string
+      CACHE:
+        required: false
+        type: boolean
+        default: true
+      PUSH:
+        required: false
+        type: boolean
+        default: true
+      CACHE_SUFFIX:
+        required: false
+        type: string
+        default: ""
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_TOKEN:
+        required: true
+      ARM_SSH_KEY:
+        required: false
+      ARM_SSH_IP:
+        required: false
+      ARM_SSH_CONFIG:
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Replace VERSION
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh ${{ inputs.RELEASE }}
+      - name: Replace VERSION 1.5
+        if: inputs.RELEASE == '1.5'
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh dev
+      - name: Setup SSH for ARM node
+        if: startsWith(inputs.CACHE_SUFFIX, 'arm')
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
+          chmod 600 ~/.ssh/id_rsa_arm
+          echo "$SSH_CONFIG" | sed "s/SSH_IP/$SSH_IP/g" > ~/.ssh/config
+          # Enhanced keepalive and timeout settings for long-running builds
+          cat >> ~/.ssh/config << 'EOF'
+          ServerAliveInterval 15
+          ServerAliveCountMax 20
+          TCPKeepAlive yes
+          ConnectTimeout 30
+          ConnectionAttempts 3
+          ControlMaster auto
+          ControlPath ~/.ssh/control-%C
+          ControlPersist 1h
+          StrictHostKeyChecking no
+          EOF
+        env:
+          SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+          SSH_IP: ${{ secrets.ARM_SSH_IP }}
+          SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+        if: startsWith(inputs.CACHE_SUFFIX, 'arm') == false
+      - name: Setup Buildx (ARM)
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+        if: startsWith(inputs.CACHE_SUFFIX, 'arm')
+        with:
+          endpoint: ssh://root@arm
+          platforms: linux/arm64,linux/arm/v7
+      - name: Login to Docker Hub
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to ghcr
+        if: inputs.PUSH == true
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Compute metadata
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+        with:
+          images: bunkerity/${{ inputs.IMAGE }}
+      # Build cached image
+      - name: Build image
+        if: inputs.CACHE == true
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        with:
+          context: .
+          file: ${{ inputs.DOCKERFILE }}
+          platforms: ${{ inputs.ARCH }}
+          load: true
+          tags: local/${{ inputs.IMAGE }}
+          cache-from: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}
+          cache-to: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }},mode=max
+          labels: ${{ steps.meta.outputs.labels }}
+      # Build non-cached image
+      - name: Build image
+        if: inputs.CACHE != true
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        with:
+          context: .
+          file: ${{ inputs.DOCKERFILE }}
+          platforms: ${{ inputs.ARCH }}
+          load: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+          tags: local/${{ inputs.IMAGE }}
+          cache-to: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=max
+          labels: ${{ steps.meta.outputs.labels }}
+      # Check OS vulnerabilities
+      - name: Check OS vulnerabilities
+        if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          vuln-type: os
+          skip-dirs: /root/.cargo
+          image-ref: local/${{ inputs.IMAGE }}
+          format: table
+          exit-code: 1
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          trivyignores: .trivyignore
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+      # - name: Docker Scout Analysis # TODO: Add back when the openssl shenanigans are fixed
+      #   if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+      #   uses: docker/scout-action@aceeb83b88f2ae54376891227858dda7af647183 # v1.18.1
+      #   with:
+      #     command: cves,recommendations
+      #     image: local/${{ inputs.IMAGE }}
+      #     only-fixed: true
+      #     only-package-types: apk
+      #     exit-code: true
+      # Push image
+      - name: Push image
+        if: inputs.PUSH == true
+        run: docker tag local/$IMAGE ghcr.io/bunkerity/$IMAGE-tests:$TAG && docker push ghcr.io/bunkerity/$IMAGE-tests:$TAG
+        env:
+          IMAGE: "${{ inputs.IMAGE }}"
+          TAG: "${{ inputs.RELEASE }}"

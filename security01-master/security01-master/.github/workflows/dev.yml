@@ -1,0 +1,293 @@
+name: Automatic tests (DEV)
+
+permissions: read-all
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+jobs:
+  # Containers
+  build-containers:
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
+        include:
+          - image: bunkerweb
+            dockerfile: src/bw/Dockerfile
+          - image: scheduler
+            dockerfile: src/scheduler/Dockerfile
+          - image: autoconf
+            dockerfile: src/autoconf/Dockerfile
+          - image: ui
+            dockerfile: src/ui/Dockerfile
+          - image: api
+            dockerfile: src/api/Dockerfile
+          - image: all-in-one
+            dockerfile: src/all-in-one/Dockerfile
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: dev
+      ARCH: linux/amd64
+      CACHE: true
+      IMAGE: ${{ matrix.image }}
+      DOCKERFILE: ${{ matrix.dockerfile }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+
+  # Build Linux packages
+  build-packages:
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        linux:
+          [
+            ubuntu,
+            debian-bookworm,
+            debian-trixie,
+            fedora-42,
+            fedora-43,
+            rhel-8,
+            rhel-9,
+            rhel-10,
+            ubuntu-jammy,
+          ]
+        include:
+          - linux: ubuntu
+            package: deb
+          - linux: ubuntu-jammy
+            package: deb
+          - linux: debian-bookworm
+            package: deb
+          - linux: debian-trixie
+            package: deb
+          - linux: fedora-42
+            package: rpm
+          - linux: fedora-43
+            package: rpm
+          - linux: rhel-8
+            package: rpm
+          - linux: rhel-9
+            package: rpm
+          - linux: rhel-10
+            package: rpm
+    uses: ./.github/workflows/linux-build.yml
+    with:
+      RELEASE: dev
+      LINUX: ${{ matrix.linux }}
+      PACKAGE: ${{ matrix.package }}
+      TEST: true
+      PLATFORMS: linux/amd64
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+
+  codeql:
+    uses: ./.github/workflows/codeql.yml
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+  # UI tests
+  # prepare-tests-ui: # TODO: Uncomment when UI tests are back
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+  #     - id: set-matrix
+  #       run: |
+  #         tests=$(find ./tests/ui/ -name "*_page.py" -type f -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
+  #         echo "tests=$tests" >> $GITHUB_OUTPUT
+  #   outputs:
+  #     tests: ${{ steps.set-matrix.outputs.tests }}
+  # tests-ui:
+  #   needs: [prepare-tests-ui, build-containers]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
+  #   uses: ./.github/workflows/tests-ui.yml
+  #   with:
+  #     TEST: ${{ matrix.test }}
+  #     RELEASE: dev
+  # tests-ui-linux:
+  #   needs: [prepare-tests-ui, build-packages]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
+  #   uses: ./.github/workflows/tests-ui-linux.yml
+  #   with:
+  #     TEST: ${{ matrix.test }}
+  #     RELEASE: dev
+
+  # Core tests
+  # prepare-tests-core:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+  #     - id: set-matrix
+  #       run: |
+  #         tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
+  #         echo "tests=$tests" >> $GITHUB_OUTPUT
+  #   outputs:
+  #     tests: ${{ steps.set-matrix.outputs.tests }}
+  # tests-core:
+  #   needs: [build-containers, prepare-tests-core]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
+  #   uses: ./.github/workflows/test-core.yml
+  #   with:
+  #     TEST: ${{ matrix.test }}
+  #     RELEASE: dev
+  # tests-core-linux:
+  #   needs: [build-packages, prepare-tests-core]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
+  #   uses: ./.github/workflows/test-core-linux.yml
+  #   with:
+  #     TEST: ${{ matrix.test }}
+  #     RELEASE: dev
+  #   secrets: inherit
+
+  # Push with dev tag
+  push-dev:
+    # needs: [tests-ui, tests-core] # TODO: Uncomment when tests are back
+    needs: [build-containers]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        image:
+          - from: bunkerweb
+            to: bunkerweb
+          - from: scheduler
+            to: bunkerweb-scheduler
+          - from: autoconf
+            to: bunkerweb-autoconf
+          - from: ui
+            to: bunkerweb-ui
+          - from: api
+            to: bunkerweb-api
+          - from: all-in-one
+            to: bunkerweb-all-in-one
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to ghcr
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push ${{ matrix.image.from }} to ${{ matrix.image.to }}
+        run: docker pull ghcr.io/bunkerity/${{ matrix.image.from }}-tests:dev && docker tag ghcr.io/bunkerity/${{ matrix.image.from }}-tests:dev bunkerity/${{ matrix.image.to }}:dev && docker tag ghcr.io/bunkerity/${{ matrix.image.from }}-tests:dev ghcr.io/bunkerity/${{ matrix.image.to }}:dev && docker push bunkerity/${{ matrix.image.to }}:dev && docker push ghcr.io/bunkerity/${{ matrix.image.to }}:dev
+
+  # Push Linux packages
+  push-packages:
+    # needs: [tests-ui-linux, tests-core-linux] # TODO: Uncomment when tests are back
+    needs: [build-packages]
+    strategy:
+      matrix:
+        linux:
+          [
+            ubuntu,
+            debian-bookworm,
+            debian-trixie,
+            fedora-42,
+            fedora-43,
+            el-8,
+            el-9,
+            el-10,
+            ubuntu-jammy,
+          ]
+        arch: [amd64]
+        include:
+          - release: dev
+            repo: bunkerweb
+          - linux: ubuntu
+            package_arch: amd64
+            separator: _
+            suffix: ""
+            version: noble
+            package: deb
+          - linux: debian-bookworm
+            package_arch: amd64
+            separator: _
+            suffix: ""
+            version: bookworm
+            package: deb
+          - linux: debian-trixie
+            package_arch: amd64
+            separator: _
+            suffix: ""
+            version: trixie
+            package: deb
+          - linux: fedora-42
+            package_arch: x86_64
+            separator: "-"
+            suffix: "1."
+            version: 42
+            package: rpm
+          - linux: fedora-43
+            package_arch: x86_64
+            separator: "-"
+            suffix: "1."
+            version: 43
+            package: rpm
+          - linux: el-8
+            package_arch: x86_64
+            separator: "-"
+            suffix: "1."
+            version: 8
+            package: rpm
+          - linux: el-9
+            package_arch: x86_64
+            separator: "-"
+            suffix: "1."
+            version: 9
+            package: rpm
+          - linux: el-10
+            package_arch: x86_64
+            separator: "-"
+            suffix: "1."
+            version: 10
+            package: rpm
+          - linux: ubuntu-jammy
+            package_arch: amd64
+            separator: _
+            suffix: ""
+            version: jammy
+            package: deb
+    uses: ./.github/workflows/push-packagecloud.yml
+    with:
+      SEPARATOR: ${{ matrix.separator }}
+      SUFFIX: ${{ matrix.suffix }}
+      REPO: ${{ matrix.repo }}
+      LINUX: ${{ matrix.linux }}
+      VERSION: ${{ matrix.version }}
+      PACKAGE: ${{ matrix.package }}
+      BW_VERSION: ${{ matrix.release }}
+      PACKAGE_ARCH: ${{ matrix.package_arch }}
+      ARCH: ${{ matrix.arch }}
+    secrets:
+      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
