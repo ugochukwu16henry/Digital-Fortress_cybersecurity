@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+.env
+.env.*
+.venv/
+venv/
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+yarn.lock
+npm-debug.log*
+
+# Docker
+*.pid
+
+# Database
+*.sqlite3
+*.db
+
+# Logs
+*.log
+logs/
+
+# Frontend build
+/build/
+/dist/
+
+# Misc
+*.bak
+*.swp
+*.tmp
+
+# Ignore secrets
+backend/.env
+backend/.env.*
