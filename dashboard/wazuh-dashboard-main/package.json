@@ -124,6 +124,7 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
+    "**/@elastic/safer-lodash-set": "0.0.0",
     "**/@lhci/**/lighthouse": "^12.3.0",
     "**/browserify-rsa": "^4.1.1",
     "**/@babel/helpers": "^7.27.0",
@@ -211,7 +212,7 @@
     "@elastic/good": "^9.0.1-kibana3",
     "@elastic/numeral": "npm:@amoo-miki/numeral@2.6.0",
     "@elastic/request-crypto": "2.0.2",
-    "@elastic/safer-lodash-set": "0.0.1",
+    "@elastic/safer-lodash-set": "0.0.0",
     "@hapi/accept": "^5.0.2",
     "@hapi/boom": "^9.1.4",
     "@hapi/cookie": "^11.0.2",
