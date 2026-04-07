@@ -40,6 +40,36 @@ services:
     networks:
       - fortress-net
 
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    container_name: df-opensearch
+    environment:
+      discovery.type: single-node
+      bootstrap.memory_lock: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      DISABLE_SECURITY_PLUGIN: "true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - df-opensearch-data:/usr/share/opensearch/data
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200 >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+    networks:
+      - fortress-net
+
   api:
     build:
       context: ./backend
@@ -65,9 +95,31 @@ services:
     networks:
       - fortress-net
 
+  dashboard:
+    build:
+      context: ./dashboard/wazuh-dashboard-main
+      dockerfile: Dockerfile
+    container_name: df-dashboard
+    command: >
+      sh -c "yarn start --host 0.0.0.0 --port 8080 --no-base-path --opensearch.hosts=http://opensearch:9200 --opensearch.ignoreVersionMismatch=true"
+    environment:
+      OPENSEARCH_DASHBOARDS_PORT: "8080"
+      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
+      SERVER_HOST: "0.0.0.0"
+    ports:
+      - "5601:8080"
+    depends_on:
+      opensearch:
+        condition: service_healthy
+      api:
+        condition: service_started
+    networks:
+      - fortress-net
+
 networks:
   fortress-net:
     driver: bridge
 
 volumes:
   df-postgres-data:
+  df-opensearch-data:
