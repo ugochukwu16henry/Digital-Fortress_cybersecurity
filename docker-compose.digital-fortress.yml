@@ -40,7 +40,10 @@ services:
     networks:
       - fortress-net
 
+  # Optional: requires pulling from Docker Hub (needs working DNS). Start with:
+  #   docker compose --profile dashboard -f docker-compose.digital-fortress.yml up -d
   opensearch:
+    profiles: [dashboard]
     image: opensearchproject/opensearch:latest
     container_name: df-opensearch
     environment:
@@ -83,6 +86,7 @@ services:
       NUCLEI_DOCKER_CONTAINER: df-nuclei
       JWT_SECRET: change-me
       COMPLIANCE_MODE_DEFAULT: "true"
+      REQUIRE_TENANT_HEADER: "false"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
@@ -96,6 +100,7 @@ services:
       - fortress-net
 
   dashboard:
+    profiles: [dashboard]
     build:
       context: ./dashboard/wazuh-dashboard-main
       dockerfile: Dockerfile
