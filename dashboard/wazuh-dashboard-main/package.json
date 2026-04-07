@@ -124,6 +124,7 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
+    "**/@elastic/safer-lodash-set": "0.0.0",
     "**/@lhci/**/lighthouse": "^12.3.0",
     "**/browserify-rsa": "^4.1.1",
     "**/@babel/helpers": "^7.27.0",
