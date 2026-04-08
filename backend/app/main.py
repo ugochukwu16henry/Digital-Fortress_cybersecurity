@@ -1,4 +1,8 @@
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api.routes.health import router as health_router
 from app.api.routes.honeytokens import router as honeytokens_router
@@ -16,3 +20,12 @@ app.include_router(scans_router, prefix=settings.api_prefix)
 app.include_router(settings_router, prefix=settings.api_prefix)
 app.include_router(honeytokens_router, prefix=settings.api_prefix)
 app.include_router(bunkerweb_router, prefix=settings.api_prefix)
+
+static_dir = Path(__file__).resolve().parent / "static"
+if static_dir.is_dir():
+    app.mount("/ui", StaticFiles(directory=str(static_dir), html=True), name="ui")
+
+
+@app.get("/")
+def root() -> RedirectResponse:
+    return RedirectResponse(url="/ui/")

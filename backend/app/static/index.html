@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Digital Fortress</title>
+  <style>
+    body { font-family: system-ui, Segoe UI, sans-serif; max-width: 40rem; margin: 2.5rem auto; padding: 0 1.25rem; line-height: 1.5; color: #1a1a1a; }
+    h1 { font-size: 1.5rem; font-weight: 600; }
+    ul { padding-left: 1.25rem; }
+    a { color: #2563eb; }
+    code { font-size: 0.9em; background: #f4f4f5; padding: 0.1em 0.35em; border-radius: 4px; }
+    .note { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e4e4e7; font-size: 0.9rem; color: #52525b; }
+  </style>
+</head>
+<body>
+  <h1>Digital Fortress</h1>
+  <p>Backend API is running. Use these entry points:</p>
+  <ul>
+    <li><a href="/docs">Interactive API docs (Swagger)</a></li>
+    <li><a href="/redoc">ReDoc</a></li>
+    <li><a href="/api/v1/health">Health</a></li>
+  </ul>
+  <p class="note">
+    The full Wazuh/OpenSearch dashboard is optional and runs on port <strong>5601</strong> when started with
+    <code>docker compose -f docker-compose.digital-fortress.yml --profile dashboard up -d</code>
+    (requires working Docker Hub / DNS to pull OpenSearch and build the dashboard image).
+  </p>
+</body>
+</html>
