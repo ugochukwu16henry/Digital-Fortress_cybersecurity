@@ -10,7 +10,7 @@ jobs:
     
     services:
       redis:
-        image: bitnami/redis
+        image: soldevelo/redis
         env:
           REDIS_PASSWORD: password
         ports:

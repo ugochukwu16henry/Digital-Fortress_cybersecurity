@@ -63,7 +63,7 @@ services:
       - bw-universe
 
   bw-redis:
-    image: bitnami/redis:8.0
+    image: soldevelo/redis:8.0
     volumes:
       - ./acl:/acl
       - ./tls:/tls
@@ -83,7 +83,7 @@ services:
       - bw-services
 
   bw-redis-slave:
-    image: bitnami/redis:8.0
+    image: soldevelo/redis:8.0
     volumes:
       - ./acl:/acl
       - ./tls:/tls
